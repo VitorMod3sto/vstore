@@ -63,13 +63,13 @@ export default function Page() {
             <div style={{ backgroundColor: '#003366', padding: '20px', borderRadius: '10px' }}>
 
                 {/* TÍTULO DA PÁGINA  */}
-                <h2 className="text-center mb-4" style={{ textShadow: '2.5px 2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, -2.5px -2.5px 0 black', color: 'white' }}>
+                <h2 className="text-center mb-3" style={{ textShadow: '2.5px 2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, -2.5px -2.5px 0 black', color: 'white' }}>
                     Estoque de Produtos
-                    <FaTruckLoading style={{ display: 'inline-block', filter: 'drop-shadow(1.5px 2px 0 black) drop-shadow(-2px -2px 0 black) drop-shadow(2px -2px 0 black) drop-shadow(-1.5px 2px 0 black)' }} /> {/* Ícone de caminhão */}
+                    <FaTruckLoading className="ms-2" style={{ display: 'inline-block', filter: 'drop-shadow(1.5px 2px 0 black) drop-shadow(-2px -2px 0 black) drop-shadow(2px -2px 0 black) drop-shadow(-1.5px 2px 0 black)' }} /> {/* Ícone de caminhão */}
                 </h2>
 
                 {/* FORMULÁRIO DE BUSCA */}
-                <Form className="mb-3 d-flex">
+                <Form className="mb-2 d-flex">
                     <Form.Group controlId="search" className="flex-grow-1">
                         <Form.Control
                             type="text"
@@ -97,14 +97,14 @@ export default function Page() {
                 </Link>
 
                 {/* DEFININDO EXIBIÇÃO DOS PRODUTOS (USANDO ROW, COL E  CARD) */}
-                <Row xs={1} md={2} lg={6} className="g-3">
+                <Row xs={1} md={2} lg={5} className="g-3">
                     {ProdutosFiltrados.map(item => ( 
                         // Fazendo map dos produtos filtrados (colocando antes do que irá se repetir para cada produto)
 
                         <Col key={item.id}> 
                         {/* Definindo uma coluna para cada produto */}
 
-                            <Card style={{ backgroundColor: '#003366', color: 'white', border: '1px solid white' }}> 
+                            <Card style={{ backgroundColor: '#003366', color: 'white', border: '1px solid white', height:'350px' }}> 
                                 {/* Definindo um Card para cada produto */}
 
                                 <Card.Img
