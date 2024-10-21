@@ -5,18 +5,36 @@ import Pagina from "@/app/components/Pagina";
 import { Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Form } from "react-bootstrap";
+import { Button, Dropdown, Form } from "react-bootstrap";
 import { FaCheck } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaCartArrowDown } from "react-icons/fa6";
 import { v4 } from "uuid";
-import { useState } from "react";
-import ProdutoValidator from "@/services/ProdutoValidator";
+import { useEffect, useState } from "react";
+import { useFormikContext } from 'formik';
+import ProdutoValidator from "@/services/Validators/ProdutoValidator";
+import { GrCheckboxSelected } from "react-icons/gr";
 
 export default function Page({ params }) {
     const route = useRouter();
+    
     const [imagePreview, setImagePreview] = useState('');
     // Criando estado para armazenar a prévia da imagem
+
+    // useEffect para carregar as categorias do localStorage ao montar o componente
+    const [categorias, setCategorias] = useState([]);
+    useEffect(() => {
+        setCategorias(JSON.parse(localStorage.getItem('categorias')) || []);
+    }, []);
+
+    // useEffect para carregar as marcas do localStorage ao montar o componente
+    const [marcas, setMarcas] = useState([]);
+    useEffect(() => {
+        setMarcas(JSON.parse(localStorage.getItem('marcas')) || []);
+    }, []);
+
+    // Criando estado para mensagem de sucesso ao cadastrar/editar
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Carregando os produtos do localStorage ou definindo um array vazio
     const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
@@ -34,7 +52,8 @@ export default function Page({ params }) {
         imagem: '',
         tamanho: '',
         cor: '',
-        marca: ''
+        marca: '',
+        genero: ''
     };
 
     // Função para salvar os dados do produto
@@ -49,12 +68,20 @@ export default function Page({ params }) {
         }
         localStorage.setItem('produtos', JSON.stringify(produtos));
         // Salvando os produtos atualizados no localStorage
-        return route.push('/produtos');
-        // Redirecionando para a página de produtos
+
+        // Exibe a mensagem de sucesso
+        setSuccessMessage('Informações do produto salvas com sucesso!');
+        setTimeout(() => {
+
+            return route.push('/produtos');
+            // Redirecionando para a página de produtos
+
+        }, 3000); // Redireciona após 3 segundos
     }
 
     return (
         <Pagina titulo="Produto">
+            {successMessage && <div className="alert alert-success text-center">{successMessage}</div>}
 
             <div className="form-container">
 
@@ -63,7 +90,7 @@ export default function Page({ params }) {
                     {/* TÍTULO DA PÁGINA  */}
                     <b>Cadastro/Edição de Produto </b>
                     <span style={{ display: 'inline-block', filter: 'drop-shadow(1px 1px 0 black) drop-shadow(-1px -1px 0 black) drop-shadow(1px -1px 0 black) drop-shadow(-1px 1px 0 black)' }}>
-                        <FaCartArrowDown /> {/* Ícone do carrinho */}
+                        <FaCartArrowDown />
                     </span>
                 </h2>
 
@@ -88,7 +115,7 @@ export default function Page({ params }) {
                         errors,
                     }) => {
                         return (
-                            
+
                             <Form>
                                 {/* INICIANDO OS CAMPOS DO FORMULÁRIO */}
 
@@ -109,8 +136,8 @@ export default function Page({ params }) {
                                         }}
                                     >
                                         <option value="">Selecione um tipo</option>
-                                        <option value="roupa">Roupa</option>
-                                        <option value="tenis">Tênis</option>
+                                        <option value="roupa">Roupas</option>
+                                        <option value="tenis">Calçados</option>
                                     </Form.Select>
                                 </Form.Group>
 
@@ -138,13 +165,19 @@ export default function Page({ params }) {
 
                                 <Form.Group className="mb-3" controlId="categoria">
                                     <Form.Label>Categoria</Form.Label>
-                                    <Form.Control
-                                        type="text"
+                                    <Form.Select
                                         name="categoria"
                                         value={values.categoria}
                                         onChange={handleChange('categoria')}
-                                        placeholder="Digite a categoria do produto"
-                                    />
+                                    >
+                                        <option value=''>Selecione</option>
+                                        {/* fazendo map de opções com valores das categorias cadastradas */}
+                                        {categorias.map(item => (
+                                            <option key={item.nome} value={item.nome}>
+                                                {item.nome}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
                                     <div className="text-danger">{errors.categoria}</div>
                                 </Form.Group>
 
@@ -180,28 +213,39 @@ export default function Page({ params }) {
                                         type="file"
                                         accept=".png,.jpg,.jpeg"
                                         onChange={event => {
+                                            // OnChange é ativado ao selecionar arquivo
                                             const file = event.target.files[0];
-                                            // Pegando o arquivo selecionado
+                                            // Acessando o arquivo selecionado
                                             const reader = new FileReader();
-                                            // Criando um leitor de arquivos
+                                            // Usando FileReader (api do JavaScript)
+                                            // Criando um leitor de arquivos (a instância fileReader é pra ler o conteúdo)
                                             reader.onloadend = () => {
+                                                // onloadend (evento do FileReader) será a função chamada após ler o arquivo
                                                 handleChange('imagem')(reader.result);
                                                 // Atualizando a imagem no estado
                                                 setImagePreview(reader.result);
                                                 // Definindo a prévia da imagem
                                             };
                                             reader.readAsDataURL(file);
-                                            // Lendo o arquivo como uma URL
+                                            // Lendo o arquivo como uma URL (base64)
                                         }}
                                     />
+                                    <div className="text-danger">{errors.imagem}</div>
+
                                 </Form.Group>
 
                                 {imagePreview && (
                                     <div className="image-preview">
-                                        <img src={imagePreview} alt="Prévia" />
+                                        <img
+                                            src={imagePreview}
+                                            alt="Prévia"
+                                            style={{ width: '200px', height: 'auto', borderRadius: '5px' }}
+                                        />
                                     </div>
                                 )}
+                                <br />
                                 {/* Exibindo a prévia da imagem  */}
+
 
                                 {/* Renderiza o campo de tamanho baseado na categoria */}
                                 <Form.Group className="mb-3" controlId="tamanho">
@@ -234,6 +278,8 @@ export default function Page({ params }) {
                                     <div className="text-danger">{errors.tamanho}</div>
                                 </Form.Group>
 
+
+
                                 <Form.Group className="mb-3" controlId="cor">
                                     <Form.Label>Cor</Form.Label>
                                     <Form.Select
@@ -246,13 +292,13 @@ export default function Page({ params }) {
                                         aria-label="Selecione uma cor"
                                     >
                                         <option value="">Selecione uma cor</option>
-                                        <option value="Vermelho">Vermelho</option>
-                                        <option value="Laranja">Laranja</option>
                                         <option value="Amarelo">Amarelo</option>
-                                        <option value="Verde">Verde</option>
                                         <option value="Azul">Azul</option>
-                                        <option value="Anil">Anil</option>
-                                        <option value="Violeta">Violeta</option>
+                                        <option value="Branco">Branco</option>
+                                        <option value="Laranja">Laranja</option>
+                                        <option value="Preto">Preto</option>
+                                        <option value="Verde">Verde</option>
+                                        <option value="Vermelho">Vermelho</option>
                                     </Form.Select>
                                     <Form.Control
                                         type="text"
@@ -267,15 +313,36 @@ export default function Page({ params }) {
                                     <div className="text-danger">{errors.cor}</div>
                                 </Form.Group>
 
+                                <Form.Group className="mb-3" controlId="genero">
+                                    <Form.Label>Gênero</Form.Label>
+                                    <Form.Select
+                                        name="genero"
+                                        value={values.genero}
+                                        onChange={handleChange('genero')}
+                                    >
+                                        <option value="">Selecione um gênero</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                    </Form.Select>
+                                    <div className="text-danger">{errors.genero}</div>
+                                </Form.Group>
+
                                 <Form.Group className="mb-3" controlId="marca">
                                     <Form.Label>Marca</Form.Label>
-                                    <Form.Control
-                                        type="text"
+                                    <Form.Select
                                         name="marca"
                                         value={values.marca}
                                         onChange={handleChange('marca')}
-                                    />
-                                    <div className="text-danger">{errors.marca}</div>
+                                    >
+                                        <option value=''>Selecione</option>
+                                        {/* fazendo map de opções com valores das marcas cadastradas */}
+                                        {marcas.map(item => (
+                                            <option key={item.nome} value={item.nome}>
+                                                {item.nome}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    <div className="text-danger">{errors.categoria}</div>
                                 </Form.Group>
 
                                 <div className="text-center">

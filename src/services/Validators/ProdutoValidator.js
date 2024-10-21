@@ -17,14 +17,21 @@ const ProdutoValidator = Yup.object().shape({
         .min(1, 'A quantidade deve ser pelo menos 1!')
         .required('Campo obrigatório'),
     tamanho: Yup.string()
-        .oneOf(['PP', 'P', 'M', 'G', 'GG'], 'Tamanho inválido!')
+        .oneOf([
+            ...[30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46].map(String),
+            'P', 'M', 'G', 'GG', 'XG'
+        ], 'Tamanho inválido!')
         .required('Campo obrigatório'),
 
     cor: Yup.string()
         .required('Campo obrigatório'),
     marca: Yup.string()
         .required('Campo obrigatório'),
-        
+        genero: Yup.string()
+        .required('Campo obrigatório'),
+    imagem: Yup.mixed()
+        .required('Campo obrigatório'),
+
 });
 
 export default ProdutoValidator;
