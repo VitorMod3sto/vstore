@@ -15,7 +15,6 @@ import { BsPersonAdd } from "react-icons/bs";
 import { buscarEnderecoPorCep } from "@/services/apiViaCep"; // Importação
 import { MdOutlinePersonPin } from "react-icons/md";
 
-
 export default function Page({ params }) {
   const route = useRouter();
   const funcionarios = JSON.parse(localStorage.getItem('funcionarios')) || [];
@@ -30,7 +29,7 @@ export default function Page({ params }) {
   }, []);
 
   const dados = funcionarios.find(item => item.id == params.id);
-  const funcionario = dados || { nome: '', cargo: '', cpf: '', cidade: '', email: '', telefone: '', cep: '', uf: '', bairro: '', endereco: '', numero: '' };
+  const funcionario = dados || { nome: '', cargo: '', cpf: '', dataNascimento: '', cidade: '', email: '', telefone: '', cep: '', uf: '', bairro: '', endereco: '', numero: '' };
 
   function salvar(dados) {
     if (funcionario.id) {
@@ -52,7 +51,7 @@ export default function Page({ params }) {
 
       <div className="form-container">
         <h2 className="text-center mb-3" style={{ textShadow: '2.5px 2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, -2.5px -2.5px 0 black', color: 'white' }}>
-          Adicionar/Editar Funcionário <MdOutlinePersonPin  style={{ display: 'inline-block', filter: 'drop-shadow(1.5px 2px 0 black) drop-shadow(-2px -2px 0 black) drop-shadow(2px -2px 0 black) drop-shadow(-1.5px 2px 0 black)' }}  /> 
+          Adicionar/Editar Funcionário <MdOutlinePersonPin style={{ display: 'inline-block', filter: 'drop-shadow(1.5px 2px 0 black) drop-shadow(-2px -2px 0 black) drop-shadow(2px -2px 0 black) drop-shadow(-1.5px 2px 0 black)' }} />
         </h2>
 
         <Formik
@@ -89,122 +88,173 @@ export default function Page({ params }) {
 
             return (
               <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="nome">
-                  <Form.Label>Nome</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="nome"
-                    value={values.nome}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="nome">
+                      <Form.Label>Nome</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="nome"
+                        value={values.nome}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="cargo">
+                      <Form.Label>Cargo</Form.Label>
+                      <Form.Select
+                        name="cargo"
+                        value={values.cargo}
+                        onChange={handleChange}
+                      >
+                        <option value=''>Selecione</option>
+                        <option value='Gerente'>Gerente</option>
+                        <option value='Coordenador'>Coordenador</option>
+                        <option value='TI'>TI</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3" controlId="cpf">
-                  <Form.Label>CPF</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="cpf"
-                    value={values.cpf}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="dataNascimento">
+                      <Form.Label>Data de Nascimento</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="dataNascimento"
+                        value={values.dataNascimento}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="cpf">
+                      <Form.Label>CPF</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="cpf"
+                        value={values.cpf}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3" controlId="email">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="email">
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        value={values.email}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="telefone">
+                      <Form.Label>Telefone</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="telefone"
+                        value={values.telefone}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3" controlId="telefone">
-                  <Form.Label>Telefone</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="telefone"
-                    value={values.telefone}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="cep">
+                      <Form.Label>CEP</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="cep"
+                        value={values.cep}
+                        onChange={handleChange('cep')}
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="uf">
+                      <Form.Label>UF</Form.Label>
+                      <Form.Select
+                        name="uf"
+                        value={values.uf}
+                        onChange={handleChange('uf')}
+                      >
+                        <option value=''>Selecione</option>
+                        {ufs.map(item => (
+                          <option key={item.sigla} value={item.sigla}>
+                            {item.sigla} - {item.nome}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3" controlId="cep">
-                  <Form.Label>CEP</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="cep"
-                    value={values.cep}
-                    onChange={handleChange('cep')}
-                  />
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="cidade">
+                      <Form.Label>Cidade</Form.Label>
+                      <Form.Select
+                        name="cidade"
+                        value={values.cidade}
+                        onChange={handleChange('cidade')}
+                      >
+                        <option value=''>Selecione</option>
+                        {cidades.map(item => (
+                          <option key={item.nome} value={item.nome}>
+                            {item.nome}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="bairro">
+                      <Form.Label>Bairro:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="bairro"
+                        value={values.bairro}
+                        onChange={handleChange('bairro')}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3" controlId="uf">
-                  <Form.Label>UF</Form.Label>
-                  <Form.Select
-                    name="uf"
-                    value={values.uf}
-                    onChange={handleChange('uf')}
-                  >
-                    <option value=''>Selecione</option>
-                    {ufs.map(item => (
-                      <option key={item.sigla} value={item.sigla}>
-                        {item.sigla} - {item.nome}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="cidade">
-                  <Form.Label>Cidade</Form.Label>
-                  <Form.Select
-                    name="cidade"
-                    value={values.cidade}
-                    onChange={handleChange('cidade')}
-                  >
-                    <option value=''>Selecione</option>
-                    {cidades.map(item => (
-                      <option key={item.nome} value={item.nome}>
-                        {item.nome}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="bairro">
-                  <Form.Label>Bairro:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="bairro"
-                    value={values.bairro}
-                    onChange={handleChange('bairro')}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="endereco">
-                  <Form.Label>Endereço:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="endereco"
-                    value={values.endereco}
-                    onChange={handleChange('endereco')}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="numero">
-                  <Form.Label>Número</Form.Label>
-                  <Form.Select
-                    name="numero"
-                    value={values.numero}
-                    onChange={handleChange('numero')}
-                  >
-                    <option value="0">0</option>
-                    {[...Array(100).keys()].map(i => (
-                      <option key={i + 1} value={i + 1}>{i + 1}</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
+                <div className="row mb-3">
+                  <div className="col">
+                    <Form.Group controlId="endereco">
+                      <Form.Label>Endereço:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="endereco"
+                        value={values.endereco}
+                        onChange={handleChange('endereco')}
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col">
+                    <Form.Group controlId="numero">
+                      <Form.Label>Número</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="numero"
+                        value={values.numero}
+                        onChange={handleChange}
+                        placeholder="Digite um número"
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
 
                 <div className="text-center">
                   <Button type="submit" variant="success" style={{ fontWeight: 'bold' }}>
