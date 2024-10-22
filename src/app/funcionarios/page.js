@@ -90,71 +90,71 @@ export default function Page() {
 
                 {/* DEFININDO EXIBIÇÃO DOS FUNCIONÁRIOS (USANDO ROW, COL E CARD) */}
                 <Row className="g-3">
-    {funcionariosFiltrados.map(item => (
-        <Col key={item.id} xs={12} sm={6} md={4} lg={3}>
-            <Card style={{
-                width: '100%',
-                height: 'auto', // Ajustar para auto para permitir o crescimento do card
-                border: 'none', // Remover borda
-                borderRadius: '15px', // Bordas arredondadas
-                backgroundColor: '#ffffff', // Fundo branco para contraste
-                color: '#003366',
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', // Sombra suave
-                padding: '10px', // Padding interno
-            }}>
-                <Card.Header style={{
-                    backgroundColor: '#003366',
-                    color: 'white',
-                    textAlign: 'center',
-                    borderRadius: '15px 15px 0 0' // Arredondar apenas o topo
-                }}>
-                    <strong>{item.nome} <BsPersonFillCheck  style={{ marginBottom: '4px' }}/></strong>
-                </Card.Header>
+                    {funcionariosFiltrados.map(item => (
+                        <Col key={item.id} xs={12} sm={6} md={4} lg={3}>
+                            <Card style={{
+                                width: '100%',
+                                height: 'auto', // Ajustar para auto para permitir o crescimento do card
+                                border: 'none', // Remover borda
+                                borderRadius: '15px', // Bordas arredondadas
+                                backgroundColor: '#ffffff', // Fundo branco para contraste
+                                color: '#003366',
+                                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', // Sombra suave
+                                padding: '10px', // Padding interno
+                            }}>
+                                <Card.Header style={{
+                                    backgroundColor: '#003366',
+                                    color: 'white',
+                                    textAlign: 'center',
+                                    borderRadius: '15px 15px 0 0' // Arredondar apenas o topo
+                                }}>
+                                    <strong>{item.nome} <BsPersonFillCheck style={{ marginBottom: '4px' }} /></strong>
+                                </Card.Header>
 
-                <Card.Body className="d-flex flex-column" style={{ padding: '10px' }}>
-                    <Card.Text className="flex-grow-1 text-center" style={{ marginBottom: '10px' }}>
-                        <strong>Cargo:</strong> {item.cargo}<br />
-                        <strong>E-mail:</strong> {item.email}<br />
-                        <strong>Telefone:</strong> {item.telefone}<br />
-                        <strong>Endereço:</strong> {item.endereco.replace(/Quadra/gi, '').trim().slice(0, 22) + (item.endereco.length > 20 ? '...' : '')}
+                                <Card.Body className="d-flex flex-column" style={{ padding: '10px' }}>
+                                    <Card.Text className="flex-grow-1 text-center" style={{ marginBottom: '10px' }}>
+                                        <strong>Cargo:</strong> {item.cargo}<br />
+                                        <strong>E-mail:</strong> {item.email}<br />
+                                        <strong>Telefone:</strong> {item.telefone}<br />
+                                        <strong>Endereço:</strong> {item.endereco.replace(/Quadra/gi, '').trim().slice(0, 22) + (item.endereco.length > 20 ? '...' : '')}
 
-                    </Card.Text>
+                                    </Card.Text>
 
-                    <div className="d-flex justify-content-center" style={{ marginTop: 'auto' }}>
-                        <Link
-                            href={`/funcionarios/form/${item.id}`}
-                            className="btn btn-primary btn-sm me-2"
-                            style={{
-                                backgroundColor: '#003366',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                borderRadius: '5px',
-                                padding: '5px 10px'
-                            }}
-                        >
-                            <FaPen style={{ marginBottom: '3px' }} /> Editar
-                        </Link>
+                                    <div className="d-flex justify-content-center" style={{ marginTop: 'auto' }}>
+                                        <Link
+                                            href={`/funcionarios/form/${item.id}`}
+                                            className="btn btn-primary btn-sm me-2"
+                                            style={{
+                                                backgroundColor: '#003366',
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                borderRadius: '5px',
+                                                padding: '5px 10px'
+                                            }}
+                                        >
+                                            <FaPen style={{ marginBottom: '3px' }} /> Editar
+                                        </Link>
 
-                        <Button
-                            variant="danger"
-                            style={{
-                                fontWeight: 'bold',
-                                marginBottom: '0',
-                                borderRadius: '5px',
-                                padding: '3px 10px'
-                            }}
-                            className="ms-1"
-                            size="sm"
-                            onClick={() => excluir(item.id)}
-                        >
-                            <FaTrashAlt style={{ marginBottom: '3px' }} /> Excluir
-                        </Button>
-                    </div>
-                </Card.Body>
-            </Card>
-        </Col>
-    ))}
-</Row>
+                                        <Button
+                                            variant="danger"
+                                            style={{
+                                                fontWeight: 'bold',
+                                                marginBottom: '0',
+                                                borderRadius: '5px',
+                                                padding: '3px 10px'
+                                            }}
+                                            className="ms-1"
+                                            size="sm"
+                                            onClick={() => excluir(item.id)}
+                                        >
+                                            <FaTrashAlt style={{ marginBottom: '3px' }} /> Excluir
+                                        </Button>
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
             </div>
         </Pagina>
     );
