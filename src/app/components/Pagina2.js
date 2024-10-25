@@ -10,6 +10,7 @@ import { FaTruckFast } from "react-icons/fa6";
 import { IoPersonCircleOutline } from "react-icons/io5";
 import { AiFillHome } from "react-icons/ai";
 import { MdLocalGroceryStore } from "react-icons/md";
+import Link from "next/link";
 
 
 
@@ -136,16 +137,22 @@ export default function Pagina2(props) {
                 className="custom-modal" // Adicione uma classe personalizada
             >
                 <Modal.Header style={{ backgroundColor: '#003366', color: 'white' }}>
-                    <Modal.Title> <IoPersonCircleOutline style={{ marginBottom: '05px', marginRight: '02px', fontSize:'35px' }} />Olá, acesse sua conta</Modal.Title>
+                    <Modal.Title> <IoPersonCircleOutline style={{ marginBottom: '05px', marginRight: '02px', fontSize: '35px' }} />Olá, acesse sua conta</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ backgroundColor: '#003366', color: 'white', fontSize: '20px' }}>
                     <ul style={{ padding: 0, listStyleType: 'none' }}>
-                        <li> <AiFillHome  style={{ marginBottom: '05px' }} /> Minha Conta</li>
-                        <li> <MdLocalGroceryStore style={{ marginBottom: '03px' }} /> Produtos</li>
+                    <Link href={`/paginas/clientes/login`} style={{ textDecoration: 'none', color: 'white' }}>
+                        <li> <AiFillHome style={{ marginBottom: '05px' }} /> Minha Conta</li>
+                        </Link>
+                        <Link href={`/produtos`} style={{ textDecoration: 'none', color: 'white' }}>
+                            <li>
+                                <MdLocalGroceryStore style={{ marginBottom: '3px' }} /> Produtos
+                            </li>
+                        </Link>
                     </ul>
                 </Modal.Body>
                 <Modal.Footer style={{ backgroundColor: '#003366', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    
+
                     <Button
                         variant="light"
                         style={{
@@ -154,7 +161,7 @@ export default function Pagina2(props) {
                             fontWeight: 'bold',
                             color: '#003366', backgroundColor: 'white'
                         }}
-                        href="/login" 
+                        href="/login"
                     >
                         LOGIN
                     </Button>
@@ -164,10 +171,10 @@ export default function Pagina2(props) {
                             width: '100%',
                             margin: '10px 0',
                             fontWeight: 'bold',
-                             color: 'white', backgroundColor: '#003366',
-                             border:'none'
+                            color: 'white', backgroundColor: '#003366',
+                            border: 'none'
                         }}
-                        href="/cadastro" 
+                        href="/cadastro"
                     >
                         CADASTRE-SE
                     </Button>
