@@ -13,11 +13,11 @@ export default function Pagina(props) {
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="me-auto">
                             <Nav.Link href="/" style={{ color: '#ffffff' }}>Início</Nav.Link>
-                            <Nav.Link href="/" style={{ color: '#ffffff' }}>Produtos</Nav.Link>
-                            <NavDropdown title={<span style={{ color: '#ffffff' }}>Categorias</span>} id="basic-nav-dropdown">
-                                <NavDropdown.Item href="#" style={{ color: '#333333' }}>Categoria 1</NavDropdown.Item>
-                                <NavDropdown.Item href="#" style={{ color: '#333333' }}>Categoria 2</NavDropdown.Item>
-                                <NavDropdown.Item href="#" style={{ color: '#333333' }}>Categoria 3</NavDropdown.Item>
+                            <Nav.Link href="/produtos" style={{ color: '#ffffff' }}>Estoque</Nav.Link>
+                            <NavDropdown title={<span style={{ color: '#ffffff' }}>Controle</span>} id="basic-nav-dropdown">
+                                <NavDropdown.Item href="/categorias" style={{ color: '#333333' }}>Categorias</NavDropdown.Item>
+                                <NavDropdown.Item href="/marcas" style={{ color: '#333333' }}>Marcas</NavDropdown.Item>
+                                <NavDropdown.Item href="/produtos" style={{ color: '#333333' }}>Produtos</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
                         <Nav className="ms-auto">

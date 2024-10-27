@@ -9,9 +9,6 @@ import { IoIosClose } from "react-icons/io";
 import { LuPackagePlus } from "react-icons/lu";
 
 
-
-
-
 export default function Page() {
     const [produtos, setProdutos] = useState([]);
     // Estado para armazenar os produtos
@@ -22,13 +19,6 @@ export default function Page() {
     const [produtosFiltrados, setProdutosFiltrados] = useState([]);
     // Estado para armazenar produtos filtrados pela busca
 
-    const [showModal, setShowModal] = useState(false);
-    // Estado para controlar a visibilidade do modal
-     // Definindo false para não exibir a modal (inicia nesse estado)
-
-    const [produtoSelecionado, setProdutoSelecionado] = useState(null);
-    // Estado para armazenar o produto selecionado para exibição no modal
-
     useEffect(() => {
         // useEffect para carregar os produtos do localStorage ao montar o componente
         const dados = JSON.parse(localStorage.getItem('produtos')) || [];
@@ -38,6 +28,15 @@ export default function Page() {
         setProdutosFiltrados(dados);
         // Inicializando os produtos filtrados com todos os produtos
     }, []);
+
+    const [showModal, setShowModal] = useState(false);
+    // Estado para controlar a visibilidade do modal
+    // Definindo false para não exibir a modal (inicia nesse estado)
+
+    const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+    // Estado para armazenar o produto selecionado para exibição no modal
+
+
 
     // Função para realizar a busca de produtos
     function buscarProdutos() {
@@ -70,7 +69,7 @@ export default function Page() {
         setProdutoSelecionado(produto);
         setShowModal(true);
         // Mudando o estado da modal pra true e exibindo a modal
-       
+
     }
 
     // Função para fechar o modal
@@ -110,30 +109,34 @@ export default function Page() {
 
                 {/* BOTÃO PARA ADICIONAR PRODUTO */}
                 <Link href="/produtos/form" className="btn btn-light mb-2" style={{ fontWeight: 'bold', color: '#003366', border: '2px solid white' }}>
-                <LuPackagePlus  style={{ marginBottom: '4px' }} /> Adicionar
+                    <LuPackagePlus style={{ marginBottom: '4px' }} /> Adicionar
                 </Link>
 
                 {/* DEFININDO EXIBIÇÃO DOS PRODUTOS (USANDO ROW, COL E CARD) */}
-                <Row xs={1} md={2} lg={4} className="g-3">
+                <Row xs={1} md={2} lg={5} className="g-3">
                     {produtosFiltrados.map(item => (
                         <Col key={item.id}>
-                            <Card style={{ backgroundColor: '#003366', color: 'white', border: '1px solid white', height: '365px' }}>
-                               
+                            <Card style={{ backgroundColor: '#003366', color: 'white', border: '1px solid white', height: '410px' }}>
+
                                 <Card.Img
-                                    style={{ margin: '5px auto', width: '95%', height: '180px', borderRadius: '5px' }}
+                                    style={{ margin: '5px auto', width: '95%', height: '200px', borderRadius: '5px' }}
                                     variant="top"
                                     src={item.imagem}
                                 />
 
-                                <Card.Body className="align-items-center" style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Card.Title><b>{item.nome}</b></Card.Title>
-                                    <Card.Text>
-                                        <strong>Tamanho: </strong>{item.tamanho.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <br />
-                                        <strong>Quantidade:</strong> {item.quantidade}<br />
-                                        <strong>Cor:</strong> {item.cor}
-                                    </Card.Text>
+                                <Card.Body className="d-flex flex-column text-center" style={{ height: '100%' }}>
+                                    <div className="flex-grow-1">
+                                        <Card.Title>
+                                            <b>{item.nome.length > 23 ? item.nome.slice(0, 23) + '...' : item.nome}</b>
+                                        </Card.Title>
+                                        <Card.Text>
+                                            <strong>Tamanho: </strong>{item.tamanho.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <br />
+                                            <strong>Quantidade:</strong> {item.quantidade}<br />
+                                            <strong>Cor:</strong> {item.cor}
+                                        </Card.Text>
+                                    </div>
 
-                                    <div className="d-flex justify-content-between align-items-center">
+                                    <div className="d-flex justify-content-between align-items-center mt-auto">
                                         <Link
                                             href={`/produtos/form/${item.id}`}
                                             className="btn btn-primary btn-sm"
@@ -161,9 +164,9 @@ export default function Page() {
                                         >
                                             <FaInfoCircle style={{ marginBottom: '2px' }} />
                                         </Button>
-                                        
                                     </div>
                                 </Card.Body>
+
                             </Card>
                         </Col>
                     ))}

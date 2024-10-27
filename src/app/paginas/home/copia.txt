@@ -45,7 +45,7 @@ export default function Pagina2(props) {
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
 
-      
+                        {/* Barra de Pesquisa Centralizada e Ampliada */}
                         <div style={{ flexGrow: 1, marginLeft: '220px' }}>
                             <Form className="d-flex" style={{ maxWidth: '600px' }}>
                                 <Form.Group controlId="search" className="flex-grow-1">
@@ -135,7 +135,7 @@ export default function Pagina2(props) {
                     transform: 'translateY(-50%)',
                     width: '350px'
                 }}
-                className="custom-modal" 
+                className="custom-modal" // Adicione uma classe personalizada
             >
                 <Modal.Header style={{ backgroundColor: '#003366', color: 'white' }}>
                     <Modal.Title> <IoPersonCircleOutline style={{ marginBottom: '05px', marginRight: '02px', fontSize: '35px' }} />Olá, acesse sua conta</Modal.Title>
