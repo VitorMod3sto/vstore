@@ -22,11 +22,10 @@ export default function Page() {
 
 
     const [indexGrupo, setIndexGrupo] = useState(0);
-    // Estado para armazenar os produtos que serão visiveis no Carrossel
+    // Estado para armazenar o índice do grupo de produtos no array de grupos de produtos (iniciado em 0)
 
     const produtosPorGrupo = 8;
     // Definindo que devem ser exibidos 8 produtos no Carrossel na variável produtosPorGrupo
-
 
     const gruposDeProdutos = [];
     // Criando variável pra armazenar os grupos de produtos
@@ -36,11 +35,23 @@ export default function Page() {
         // Armazenando na variável grupo os produtos que serão exibidos
         for (let j = 0; j < produtosPorGrupo; j++) {
             // Criando grupo de 8 produtos
+            /* j será a variável que será meu "contador", iniciado em 0 e será incrementado até que J tenha os produtos desejados
+            (sendo 8 produtos já que defini produtosPorGrupo = 8 ), ou seja, repete o loop enquanto  j < produtosPorGrupo */
             const index = (i + j) % produtos.length;
             // Garantindo que terá 8 produtos mesmo que tenha que repetir os produtos
+            // Index armazena a posição do produto dentro do Array de produtos
+            /* i armazena a posição inicial do produto no grupo atual (exemplo: grupo index 0 de produtos contém 8 produtos, sendo 
+            produtos do index 0-7, ou seja, se i=8 o produto pertence ao grupo de produtos de indíce (index) 1),
+             j armazena a posição do produto dentro do grupo atual (exemplo: se estiver no grupo de index 1, qual posição o produto 
+             está dentro desse grupo).
+            Já soma i + j resulta em um índice global (do Array produtos).
+            O operador de módulo % garante que caso a soma ultrapasse o número de produtos totais (dentro do Array produtos),
+            volte pra o ínicio do array, repetindo os produtos  */
             grupo.push(produtos[index]);
+            // Adicionando ao grupo, o produto acessado pelo index
         }
         gruposDeProdutos.push(grupo);
+        // Adicionando o grupo completo (8 produtos) ao array de grupos de produtos
     }
 
     const totalGrupos = gruposDeProdutos.length;
@@ -48,7 +59,7 @@ export default function Page() {
 
 
     const handlePrev = () => {
-        // Criando função que atualiza o setIndexGrupo pra exibir o grupo de produtos anterior
+        // Criando função que atualiza o setIndexGrupo pra exibir o grupo de produtos anterior (a partir do índice no array de grupos)
         setIndexGrupo((prev) => (prev === 0 ? totalGrupos - 1 : prev - 1));
         // Definindo que caso já esteja no primeiro grupo, volte pro último
     };
@@ -57,6 +68,41 @@ export default function Page() {
         // Criando função que atualiza o setIndexGrupo pra exibir o próximo grupo de produtos 
         setIndexGrupo((prev) => (prev === totalGrupos - 1 ? 0 : prev + 1));
         // Definindo que caso já esteja no último grupo, volte pro primeiro
+    };
+
+
+    // APLICANDO A MESMA LÓGICA ACIMA MAS PRA EXIBIR APENAS BLUSAS DE TIME AGORA
+    const [produtosBlusas, setProdutosBlusas] = useState([]);
+
+    const [indexGrupoBlusas, setIndexGrupoBlusas] = useState(0);
+
+    const produtosPorGrupoBlusas = 5;
+
+    useEffect(() => {
+        const dados = JSON.parse(localStorage.getItem('produtos')) || [];
+        setProdutos(dados);
+        setProdutosBlusas(dados.filter(produto => produto.categoria === 'Blusas de time'));
+    }, []);
+
+
+    const gruposDeBlusas = [];
+    for (let i = 0; i < produtosBlusas.length; i++) {
+        const grupo = [];
+        for (let j = 0; j < produtosPorGrupoBlusas; j++) {
+            const index = (i + j) % produtosBlusas.length;
+            grupo.push(produtosBlusas[index]);
+        }
+        gruposDeBlusas.push(grupo);
+    }
+
+    const totalGruposBlusas = gruposDeBlusas.length;
+
+    const handlePrevBlusas = () => {
+        setIndexGrupoBlusas((prev) => (prev === 0 ? totalGruposBlusas - 1 : prev - 1));
+    };
+
+    const handleNextBlusas = () => {
+        setIndexGrupoBlusas((prev) => (prev === totalGruposBlusas - 1 ? 0 : prev + 1));
     };
 
     return (
@@ -78,7 +124,9 @@ export default function Page() {
                             <FaChevronRight style={{ color: 'black', fontSize: '24px' }} />
                         </div>
                     }
-                >
+                > {/* Definindo acima que irá ser exibido cada produto a cada 0.5s e deixando ser exibido o slider inferior
+                   indicando qual produto está sendo exibido. Também defini os botões de passar o slide por seta (icons) */}
+
                     {/* Exibindo apenas os 3 primeiros produtos (Slice) */}
                     {produtos.slice(0, 4).map((produto) => (
                         <Carousel.Item key={produto.id}>
@@ -106,16 +154,18 @@ export default function Page() {
 
 
             {/* SEGUNDO CARROSSEL (produtos sendo exibidos em grupos de 8) */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 15px' }}>
-
-                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', margin: 0, fontWeight: '900' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 15px' }}>
+                <h2 style={{
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: '900',
+                    margin: '0',
+                }}>
                     MAIS PRODUTOS
                 </h2>
 
                 <Link href={`/paginas/produtos`}>
                     <button style={{
                         fontFamily: 'Montserrat, sans-serif',
-                        fontWeight: '900',
                         fontWeight: 'bold',
                         backgroundColor: 'black',
                         color: 'white',
@@ -123,18 +173,17 @@ export default function Page() {
                         borderRadius: '5px',
                         padding: '8px 16px',
                         cursor: 'pointer',
-                        marginLeft: '10px',
-                        height: '50px'
+                        marginLeft: '15px',
+                        height: '50px', 
+                        marginBottom: '5px'
                     }}>
                         Saiba Mais
                     </button>
-                    </Link>
+                </Link>
             </div>
 
-
-
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '200px' }}
+                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '220px', marginTop: '0', marginBottom: '0' }} // Remover margens
                     interval={null} indicators={false}
                     prevIcon={
                         <div style={{
@@ -151,7 +200,7 @@ export default function Page() {
                             backgroundColor: '#003366',
                             borderRadius: '50%',
                             padding: '10px',
-                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                            boxShadow: '0 2px 5px  rgba(0, 0, 0, 0.3)',
                         }} onClick={handleNext}>
                             <FaChevronRight style={{ color: 'white', fontSize: '24px' }} />
                         </div>
@@ -182,6 +231,81 @@ export default function Page() {
                                                     borderRadius: '5px',
                                                 }}
                                             />
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </div><br /><br />
+
+
+            {/* TERCEIRO CARROSSEL (blusas de time sendo exibidos em grupos de 5) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', margin: '0 15px' }}>
+                    <Link href={`/paginas/produtos`}>
+                        <button style={{
+                            fontFamily: 'Montserrat, sans-serif',
+                            fontWeight: 'bold',
+                            backgroundColor: 'black',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            padding: '8px 16px',
+                            cursor: 'pointer',
+                            height: '50px',
+                            marginLeft: '30px',
+                            marginBottom: '10px' 
+                        }}>
+                            Saiba Mais
+                        </button>
+                    </Link>
+                    <h2 style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: '900',
+                        marginTop: '5px',
+                        marginRight: '35px',
+                        textAlign: 'right', // Alinhamento à direita    
+                    }}>
+                        BLUSAS DE TIME
+                    </h2>
+                </div>
+
+                <Carousel
+                    data-bs-theme="dark"
+                    style={{ width: '100%', height: '320px', marginTop: '0' }}
+                    interval={null}
+                    indicators={false}
+                    prevIcon={
+                        <div style={{
+                            backgroundColor: '#003366',
+                            borderRadius: '50%',
+                            padding: '10px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                        }} onClick={handlePrevBlusas}>
+                            <FaChevronLeft style={{ color: 'white', fontSize: '24px' }} />
+                        </div>
+                    }
+                    nextIcon={
+                        <div style={{
+                            backgroundColor: '#003366',
+                            borderRadius: '50%',
+                            padding: '10px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                        }} onClick={handleNextBlusas}>
+                            <FaChevronRight style={{ color: 'white', fontSize: '24px' }} />
+                        </div>
+                    }
+                >
+                    {gruposDeBlusas.map((grupo, index) => (
+                        <Carousel.Item key={index} active={index === indexGrupoBlusas}>
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
+                                {grupo.map(produto => (
+                                    <Link key={produto.id} href={`/produtos/${produto.id}`}>
+                                        <div style={{ border: '3px solid #003366', borderRadius: '8px', padding: '0', textAlign: 'center', flex: '0 0 auto', margin: '0 1px' }}>
+                                            <img src={produto.imagem} alt={produto.nome}
+                                                style={{ objectFit: 'contain', height: '260px', width: '100%', borderRadius: '5px' }} />
                                         </div>
                                     </Link>
                                 ))}

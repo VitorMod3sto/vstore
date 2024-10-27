@@ -1,188 +1,210 @@
-import { useState } from "react";
-import { Navbar, Container, Nav, NavDropdown, Dropdown, Form, Button, Modal } from "react-bootstrap";
-import { BiLogoVuejs } from "react-icons/bi";
-import { IoPerson } from "react-icons/io5";
-import { IoMdMenu } from "react-icons/io";
-import { FaBoxOpen, FaShoppingCart } from "react-icons/fa";
-import { FaSearch } from "react-icons/fa";
-import Footer from "./Footer";
-import { FaTruckFast } from "react-icons/fa6";
-import { IoPersonCircleOutline } from "react-icons/io5";
-import { AiFillHome } from "react-icons/ai";
-import { MdLocalGroceryStore } from "react-icons/md";
+'use client'
+
+import Pagina2 from "@/app/components/Pagina2";
+import { useEffect, useState } from "react";
+import { Carousel } from "react-bootstrap";
+import Link from 'next/link';
+import { FaChevronLeft, FaChevronRight, FaFireAlt, FaStar } from "react-icons/fa";
 
 
 
+export default function Page() {
+    const [produtos, setProdutos] = useState([]);
+    // Estado para armazenar os produtos
 
-export default function Pagina2(props) {
-    const [search, setSearch] = useState('');
-    const [showModal, setShowModal] = useState(false);
+    useEffect(() => {
+        // useEffect para carregar os produtos do localStorage ao montar o componente
+        const dados = JSON.parse(localStorage.getItem('produtos')) || [];
+        // Carregando produtos do localStorage (usando JSON parse para converter de string para objeto JavaScript)
+        setProdutos(dados);
+        // Atualizando o estado dos produtos
+    }, []);
 
-    const handleClose = () => setShowModal(false);
-    const handleShow = () => setShowModal(true);
+
+    const [indexGrupo, setIndexGrupo] = useState(0);
+    // Estado para armazenar o índice do grupo de produtos no array de grupos de produtos (iniciado em 0)
+
+    const produtosPorGrupo = 8;
+    // Definindo que devem ser exibidos 8 produtos no Carrossel na variável produtosPorGrupo
+
+    const gruposDeProdutos = [];
+    // Criando variável pra armazenar os grupos de produtos
+    for (let i = 0; i < produtos.length; i += produtosPorGrupo) {
+        //Iterando todos os produtos em incrementos de 8 (definidos em produtosPorGrupo)
+        const grupo = [];
+        // Armazenando na variável grupo os produtos que serão exibidos
+        for (let j = 0; j < produtosPorGrupo; j++) {
+            // Criando grupo de 8 produtos
+            /* j será a variável que será meu "contador", iniciado em 0 e será incrementado até que J tenha os produtos desejados
+            (sendo 8 produtos já que defini produtosPorGrupo = 8 ), ou seja, repete o loop enquanto  j < produtosPorGrupo */
+            const index = (i + j) % produtos.length;
+            // Garantindo que terá 8 produtos mesmo que tenha que repetir os produtos
+            // Index armazena a posição do produto dentro do Array de produtos
+            /* i armazena a posição inicial do produto no grupo atual (exemplo: grupo index 0 de produtos contém 8 produtos, sendo 
+            produtos do index 0-7, ou seja, se i=8 o produto pertence ao grupo de produtos de indíce (index) 1),
+             j armazena a posição do produto dentro do grupo atual (exemplo: se estiver no grupo de index 1, qual posição o produto 
+             está dentro desse grupo).
+            Já soma i + j resulta em um índice global (do Array produtos).
+            O operador de módulo % garante que caso a soma ultrapasse o número de produtos totais (dentro do Array produtos),
+            volte pra o ínicio do array, repetindo os produtos  */
+            grupo.push(produtos[index]);
+            // Adicionando ao grupo, o produto acessado pelo index
+        }
+        gruposDeProdutos.push(grupo);
+        // Adicionando o grupo completo (8 produtos) ao array de grupos de produtos
+    }
+
+    const totalGrupos = gruposDeProdutos.length;
+    // Armazenando o total de grupos que foi criado
+
+
+    const handlePrev = () => {
+        // Criando função que atualiza o setIndexGrupo pra exibir o grupo de produtos anterior (a partir do índice no array de grupos)
+        setIndexGrupo((prev) => (prev === 0 ? totalGrupos - 1 : prev - 1));
+        // Definindo que caso já esteja no primeiro grupo, volte pro último
+    };
+
+    const handleNext = () => {
+        // Criando função que atualiza o setIndexGrupo pra exibir o próximo grupo de produtos 
+        setIndexGrupo((prev) => (prev === totalGrupos - 1 ? 0 : prev + 1));
+        // Definindo que caso já esteja no último grupo, volte pro primeiro
+    };
+
+    
 
     return (
-        <>
-            <div style={{
-                backgroundColor: 'white',
-                color: '#003366',
-                textAlign: 'center',
-                padding: '05px 0',
-                fontWeight: 'bold'
-            }}>
-                Frete grátis pra todo Brasil! <FaTruckFast style={{ fontSize: '20px', marginBottom: '02px' }} />
-            </div>
-            <Navbar style={{ backgroundColor: '#003366' }} variant="dark">
-                <Container>
-                    <IoMdMenu
-                        style={{ color: '#ffffff', fontSize: '30px', cursor: 'pointer' }}
-                        onClick={handleShow}
-                    />
-                    <Navbar.Brand href="/">
-                        <BiLogoVuejs style={{ fontSize: '40px', marginLeft: '20' }} />
-                    </Navbar.Brand>
+        <Pagina2 titulo="Home">
+            {/* PRIMEIRO CARROSSEL (produtos únicos sendo exibidos) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
+                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', fontWeight: '900' }}>OS MAIS VENDIDOS</h2>
 
-                        {/* Barra de Pesquisa Centralizada e Ampliada */}
-                        <div style={{ flexGrow: 1, marginLeft: '220px' }}>
-                            <Form className="d-flex" style={{ maxWidth: '600px' }}>
-                                <Form.Group controlId="search" className="flex-grow-1">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Pesquisar produto..."
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        style={{ borderRadius: '10px' }}
-                                    />
-                                </Form.Group>
-                                <Button variant="light" style={{
-                                    color: '#003366', fontWeight: 'bold', border: '2px solid white'
-                                }} className="ms-2">
-                                    <FaSearch style={{ marginBottom: '3px' }} /> Buscar
-                                </Button>
-                            </Form>
+                <Carousel data-bs-theme="dark" style={{ marginBottom: '10px', width: '100%', maxWidth: '1000px' }}
+                    interval={500} indicators={true}
+                    prevIcon={
+                        <div style={{ color: 'black' }}>
+                            <FaChevronLeft style={{ color: 'black', fontSize: '24px' }} />
                         </div>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            backgroundColor: 'white',
-                            marginLeft: '10px',
-                            marginTop: '05px',
-                        }}>
-                            <FaShoppingCart
-
-                                style={{
-                                    color: '#003366',
-                                    fontSize: '20px'
-                                }}
-                            />
+                    }
+                    nextIcon={
+                        <div style={{ color: 'black' }}>
+                            <FaChevronRight style={{ color: 'black', fontSize: '24px' }} />
                         </div>
+                    }
+                > {/* Definindo acima que irá ser exibido cada produto a cada 0.5s e deixando ser exibido o slider inferior
+                   indicando qual produto está sendo exibido. Também defini os botões de passar o slide por seta (icons) */}
 
-                        <Nav className="ms-auto">
-                            <Dropdown>
-                                <Dropdown.Toggle
-                                    as={Nav.Link}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: '40px',
-                                        height: '40px',
-                                        borderRadius: '50%',
-                                        backgroundColor: 'white',
-                                        marginLeft: '10px',
-                                        marginTop: '05px',
-                                        position: 'relative',
-                                    }}
-                                >
-                                    <IoPerson
+                    {/* Exibindo apenas os 3 primeiros produtos (Slice) */}
+                    {produtos.slice(0, 4).map((produto) => (
+                        <Carousel.Item key={produto.id}>
+                            <div style={{ padding: '30px' }}>
+                                <Link href={`/produtos/${produto.id}`}>
+                                    <img
+                                        src={produto.imagem}
+                                        alt={produto.nome}
                                         style={{
-                                            color: '#003366',
-                                            position: 'absolute',
-                                            top: '50%',
-                                            left: '50%',
-                                            transform: 'translate(-50%, -50%)',
+                                            objectFit: 'contain',
+                                            height: '400px',
+                                            width: '100%',
                                         }}
                                     />
-                                </Dropdown.Toggle>
+                                </Link>
+                                <div style={{ textAlign: 'center', marginTop: '10px', color: 'black', fontWeight: 'bold' }}>
+                                    <h5 style={{ fontFamily: 'Poppins, sans-serif' }}>{produto.nome}</h5>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif' }}> R$ {produto.preco.toFixed(2)} </p>
+                                </div>
+                            </div>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </div><br />
 
-                                <Dropdown.Menu align="end">
-                                    <Dropdown.Item href="/" style={{ color: '#003366' }}><b>Login</b></Dropdown.Item>
-                                    <Dropdown.Item href="/" style={{ color: '#003366' }}><b>Cadastre-se</b></Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
 
-                        </Nav>
+            {/* SEGUNDO CARROSSEL (produtos sendo exibidos em grupos de 8) */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 15px' }}>
 
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
+                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', margin: 0, fontWeight: '900' }}>
+                    MAIS PRODUTOS
+                </h2>
 
-            {/* Modal */}
-            <Modal
-                show={showModal}
-                onHide={handleClose}
-                style={{
-                    position: 'fixed',
-                    top: '50%',
-                    left: '0',
-                    transform: 'translateY(-50%)',
-                    width: '350px'
-                }}
-                className="custom-modal" // Adicione uma classe personalizada
-            >
-                <Modal.Header style={{ backgroundColor: '#003366', color: 'white' }}>
-                    <Modal.Title> <IoPersonCircleOutline style={{ marginBottom: '05px', marginRight: '02px', fontSize: '35px' }} />Olá, acesse sua conta</Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ backgroundColor: '#003366', color: 'white', fontSize: '20px' }}>
-                    <ul style={{ padding: 0, listStyleType: 'none' }}>
-                        <li> <AiFillHome style={{ marginBottom: '06px' }} /> Minha Conta</li>
-                        <li> <FaBoxOpen style={{ marginBottom: '03px' }} /> Produtos</li>
-                        <li> <MdLocalGroceryStore style={{ marginBottom: '03px' }} /> Meu Carrinho</li>
-                    </ul>
-                </Modal.Body>
-                <Modal.Footer style={{ backgroundColor: '#003366', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
-                    <Button
-                        variant="light"
-                        style={{
-                            width: '100%',
-                            margin: '10px 0',
-                            fontWeight: 'bold',
-                            color: '#003366', backgroundColor: 'white'
-                        }}
-                        href="/login"
-                    >
-                        LOGIN
-                    </Button>
-                    <Button
-                        variant="light"
-                        style={{
-                            width: '100%',
-                            margin: '10px 0',
-                            fontWeight: 'bold',
-                            color: 'white', backgroundColor: '#003366',
-                            border: 'none'
-                        }}
-                        href="/cadastro"
-                    >
-                        CADASTRE-SE
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+                <Link href={`/paginas/produtos`}>
+                    <button style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: '900',
+                        fontWeight: 'bold',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        marginLeft: '10px',
+                        height: '50px'
+                    }}>
+                        Saiba Mais
+                    </button>
+                </Link>
+            </div>
 
 
 
-            <Container fluid className="my-2">
-                {props.children}
-            </Container>
-            <Footer />
-        </>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '200px' }}
+                    interval={null} indicators={false}
+                    prevIcon={
+                        <div style={{
+                            backgroundColor: '#003366',
+                            borderRadius: '50%',
+                            padding: '10px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                        }} onClick={handlePrev}>
+                            <FaChevronLeft style={{ color: 'white', fontSize: '24px' }} />
+                        </div>
+                    }
+                    nextIcon={
+                        <div style={{
+                            backgroundColor: '#003366',
+                            borderRadius: '50%',
+                            padding: '10px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                        }} onClick={handleNext}>
+                            <FaChevronRight style={{ color: 'white', fontSize: '24px' }} />
+                        </div>
+                    }
+                >
+                    {/* Definindo abaixo que os produtos (suas imagens com Link) serão exibidos em grupos de 8 (gruposDeProdutos) */}
+                    {/* Definindo a key = index porque os grupos não possuem id, então usamos a posição no array*/}
+                    {gruposDeProdutos.map((grupo, index) => (
+                        <Carousel.Item key={index} active={index === indexGrupo}>
+                            <div style={{ display: 'flex', justifyContent: 'space-around', padding: '10px' }}>
+                                {grupo.map(produto => (
+                                    <Link key={produto.id} href={`/produtos/${produto.id}`}>
+                                        <div style={{
+                                            border: '3px solid #003366',
+                                            borderRadius: '8px',
+                                            padding: '10px',
+                                            textAlign: 'center',
+                                            flex: '0 0 auto',
+                                            margin: '5px'
+                                        }}>
+                                            <img
+                                                src={produto.imagem}
+                                                alt={produto.nome}
+                                                style={{
+                                                    objectFit: 'contain',
+                                                    height: '150px',
+                                                    width: '100%',
+                                                    borderRadius: '5px',
+                                                }}
+                                            />
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </div>
+        </Pagina2>
     );
 }
