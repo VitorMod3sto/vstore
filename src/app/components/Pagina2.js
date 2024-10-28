@@ -255,7 +255,7 @@ export default function Pagina2(props) {
                         <IoPersonCircleOutline
                             style={{ marginBottom: "05px", marginRight: "02px", fontSize: "35px" }}
                         />
-                        Olá, acesse sua conta
+                        Olá, seja bem vindo!
                     </Modal.Title>
                 </Modal.Header>
                 {/* Mensagem de olá */}

@@ -329,8 +329,8 @@ export default function Page() {
                     marginBottom: '10px',
                 }}>
                     {produtos
-                        .filter(produto => produto.nome.toLowerCase().includes('oakley')) // Filtra produtos com 'polo'
-                        .slice(-3) // Pega os últimos 3 produtos filtrados
+                        .filter(produto => produto.nome.toLowerCase().includes('oakley'))
+                        .slice(-3)
                         .map((produto) => (
                             <div key={produto.id} style={{
                                 padding: '20px',
@@ -344,7 +344,7 @@ export default function Page() {
                                 flexDirection: 'column',
                                 justifyContent: 'space-between'
                             }}>
-                                <Link href={`/produtos/${produto.id}`}>
+                                <Link href={`/paginas/produtos/${produto.id}`}>
                                     <img
                                         src={produto.imagem}
                                         alt={produto.nome}
@@ -371,6 +371,23 @@ export default function Page() {
                             </div>
                         ))}
                 </div>
+                <Link href={`/paginas/produtos`}>
+                        <button style={{
+                            fontFamily: 'Montserrat, sans-serif',
+                            fontWeight: 'bold',
+                            backgroundColor: 'black',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            padding: '8px 16px',
+                            cursor: 'pointer',
+                            height: '50px',
+                            marginLeft: '30px',
+                            marginBottom: '10px'
+                        }}>
+                            Saiba Mais
+                        </button>
+                    </Link>
             </div>
 
 
