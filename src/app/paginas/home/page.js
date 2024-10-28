@@ -174,7 +174,7 @@ export default function Page() {
                         padding: '8px 16px',
                         cursor: 'pointer',
                         marginLeft: '15px',
-                        height: '50px', 
+                        height: '50px',
                         marginBottom: '5px'
                     }}>
                         Saiba Mais
@@ -256,7 +256,7 @@ export default function Page() {
                             cursor: 'pointer',
                             height: '50px',
                             marginLeft: '30px',
-                            marginBottom: '10px' 
+                            marginBottom: '10px'
                         }}>
                             Saiba Mais
                         </button>
@@ -314,6 +314,66 @@ export default function Page() {
                     ))}
                 </Carousel>
             </div>
+
+
+            {/*  QUARTA SEÇÃO */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900' }}>
+                    COLEÇÃO OAKLEY
+                </h2>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    maxWidth: '1000px',
+                    marginBottom: '10px',
+                }}>
+                    {produtos
+                        .filter(produto => produto.nome.toLowerCase().includes('oakley')) // Filtra produtos com 'polo'
+                        .slice(-3) // Pega os últimos 3 produtos filtrados
+                        .map((produto) => (
+                            <div key={produto.id} style={{
+                                padding: '20px',
+                                textAlign: 'center',
+                                border: '2px solid #003366',
+                                borderRadius: '8px',
+                                margin: '10px',
+                                height: '420px',
+                                width: '350px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between'
+                            }}>
+                                <Link href={`/produtos/${produto.id}`}>
+                                    <img
+                                        src={produto.imagem}
+                                        alt={produto.nome}
+                                        style={{
+                                            objectFit: 'cover',
+                                            height: '300px',
+                                            width: '100%',
+                                        }}
+                                    />
+                                </Link>
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '80px' }}>
+                                    <h5 style={{
+                                        fontFamily: 'Poppins, sans-serif',
+                                        margin: '0',
+                                        fontWeight: '900',
+                                        overflow: 'hidden',
+                                        whiteSpace: 'nowrap',
+                                        textOverflow: 'ellipsis',
+                                    }}>
+                                        {produto.nome.length > 23 ? `${produto.nome.substring(0, 23)}...` : produto.nome}
+                                    </h5>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', margin: '0' }}>R$ {produto.preco.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        ))}
+                </div>
+            </div>
+
+
         </Pagina2>
     );
 }

@@ -19,7 +19,7 @@ const ProdutoValidator = Yup.object().shape({
     tamanho: Yup.string()
         .oneOf([
             ...[30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46].map(String),
-            'P', 'M', 'G', 'GG', 'XG'
+            'P', 'M', 'G', 'GG', 'XG', 'Tamanho Único'
         ], 'Tamanho inválido!')
         .required('Campo obrigatório'),
 

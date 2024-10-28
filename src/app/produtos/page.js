@@ -126,8 +126,14 @@ export default function Page() {
 
                                 <Card.Body className="d-flex flex-column text-center" style={{ height: '100%' }}>
                                     <div className="flex-grow-1">
-                                        <Card.Title>
-                                            <b>{item.nome.length > 23 ? item.nome.slice(0, 23) + '...' : item.nome}</b>
+                                        <Card.Title style={{
+                                            width: '200px',
+                                            whiteSpace: 'nowrap', 
+                                            overflow: 'hidden', 
+                                            textOverflow: 'ellipsis',
+                                             textAlign: 'center'
+                                        }}>
+                                            <b>{item.nome}</b>
                                         </Card.Title>
                                         <Card.Text>
                                             <strong>Tamanho: </strong>{item.tamanho.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <br />

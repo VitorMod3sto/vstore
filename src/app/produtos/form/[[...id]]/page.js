@@ -17,7 +17,7 @@ import { GrCheckboxSelected } from "react-icons/gr";
 
 export default function Page({ params }) {
     const route = useRouter();
-    
+
     const [imagePreview, setImagePreview] = useState('');
     // Criando estado para armazenar a prévia da imagem
 
@@ -138,6 +138,7 @@ export default function Page({ params }) {
                                         <option value="">Selecione um tipo</option>
                                         <option value="roupa">Roupas</option>
                                         <option value="tenis">Calçados</option>
+                                        <option value="acessorios">Acessórios</option>
                                     </Form.Select>
                                 </Form.Group>
 
@@ -250,7 +251,28 @@ export default function Page({ params }) {
                                 {/* Renderiza o campo de tamanho baseado na categoria */}
                                 <Form.Group className="mb-3" controlId="tamanho">
                                     <Form.Label>Tamanho</Form.Label>
-                                    {values.tipo === 'tenis' ? (
+                                    {['óculos', 'oculos'].includes(values.categoria.toLowerCase()) ? (
+                                        <Form.Select
+                                            name="tamanho"
+                                            value={values.tamanho}
+                                            onChange={handleChange('tamanho')}
+                                        >
+                                            <option value="">Selecione um tamanho</option>
+                                            <option value="Tamanho Único">Tamanho Único</option>
+
+                                        </Form.Select>
+                                    ) : ['bonés', 'bones'].includes(values.categoria.toLowerCase()) ? (
+                                        <Form.Select
+                                            name="tamanho"
+                                            value={values.tamanho}
+                                            onChange={handleChange('tamanho')}
+                                        >
+                                            <option value="">Selecione um tamanho</option>
+                                            {['P', 'M', 'G'].map(size => (
+                                                <option key={size} value={size}>{size}</option>
+                                            ))}
+                                        </Form.Select>
+                                    ) : values.tipo === 'tenis' ? (
                                         <Form.Select
                                             name="tamanho"
                                             value={values.tamanho}
