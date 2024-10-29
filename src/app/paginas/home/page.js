@@ -81,7 +81,7 @@ export default function Page() {
     useEffect(() => {
         const dados = JSON.parse(localStorage.getItem('produtos')) || [];
         setProdutos(dados);
-        setProdutosBlusas(dados.filter(produto => produto.categoria === 'Blusas de time'));
+        setProdutosBlusas(dados.filter(produto => produto.categoria.toLowerCase() === 'blusas de time'));
     }, []);
 
 
@@ -212,7 +212,7 @@ export default function Page() {
                         <Carousel.Item key={index} active={index === indexGrupo}>
                             <div style={{ display: 'flex', justifyContent: 'space-around', padding: '10px' }}>
                                 {grupo.map(produto => (
-                                    <Link key={produto.id} href={`/produtos/${produto.id}`}>
+                                    <Link key={produto.id} href={`/paginas/produtos/${produto.id}`}>
                                         <div style={{
                                             border: '3px solid black',
                                             borderRadius: '8px',

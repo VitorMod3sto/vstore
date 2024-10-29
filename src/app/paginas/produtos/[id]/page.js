@@ -34,6 +34,7 @@ export default function Page({ params }) {
         }
         handleClose(); // Fecha a modal após a seleção
     };
+    
 
     return (
         <Pagina2 titulo="Detalhe do Produto">
@@ -130,6 +131,8 @@ export default function Page({ params }) {
                 </Col>
             </Row>
 
+            
+
             {/* Modal para seleção de tamanho */}
 
             <Modal show={showModal} onHide={handleClose}>
@@ -141,7 +144,7 @@ export default function Page({ params }) {
                 <Modal.Body>
                     <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', fontWeight: '900', marginLeft: '15px' }}>
                         Escolha o tamanho:</p>
-                    <label style={{ marginLeft: '15px' }}>
+                    <label style={{ marginLeft: '15px', cursor: 'pointer' }}>
                         <input
                             type="checkbox"
                             checked={tamanhoChecked}
@@ -179,7 +182,6 @@ export default function Page({ params }) {
                         Selecionar
                     </Button>
                 </Modal.Footer>
-
             </Modal>
 
         </Pagina2>
