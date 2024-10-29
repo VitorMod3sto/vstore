@@ -57,7 +57,7 @@ export default function Pagina2(props) {
             <div
                 style={{
                     backgroundColor: "white",
-                    color: "#003366",
+                    color: "black",
                     textAlign: "center",
                     padding: "05px 0",
                     fontWeight: "bold",
@@ -67,7 +67,7 @@ export default function Pagina2(props) {
             </div>
 
             {/* CRIANDO MENU NAVBAR*/}
-            <Navbar style={{ backgroundColor: "#003366" }} variant="dark">
+            <Navbar style={{ backgroundColor: "black" }} variant="dark">
                 <Container>
 
                     {/* Criando as opções de Menu */}
@@ -98,7 +98,7 @@ export default function Pagina2(props) {
                                         placeholder="Pesquisar produto..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        style={{ borderRadius: "10px", position: "relative", color: "#003366", fontWeight: 'bold' }}
+                                        style={{ borderRadius: "10px", position: "relative", color: "black", fontWeight: 'bold' }}
                                     />
                                     {/* Alterando estado da pesquisa (search) ao digitar (mudar o valor) */}
 
@@ -120,7 +120,7 @@ export default function Pagina2(props) {
 
                                             {sugestoes.map(produto => (
                                                 <Link key={produto.id} href={`/paginas/produtos/produto${produto.id}`}
-                                                    style={{ textDecoration: 'none', color: '#003366' }}>
+                                                    style={{ textDecoration: 'none', color: 'black' }}>
                                                     <div
                                                         style={{
                                                             display: 'flex',
@@ -154,7 +154,7 @@ export default function Pagina2(props) {
                                 <Button
                                     variant="light"
                                     style={{
-                                        color: "#003366",
+                                        color: "black",
                                         fontWeight: "bold",
                                         border: "2px solid white",
                                     }}
@@ -182,7 +182,7 @@ export default function Pagina2(props) {
                         >
                             <FaShoppingCart
                                 style={{
-                                    color: "#003366",
+                                    color: "black",
                                     fontSize: "20px",
                                 }}
                             />
@@ -210,7 +210,7 @@ export default function Pagina2(props) {
                                 >
                                     <IoPerson
                                         style={{
-                                            color: "#003366",
+                                            color: "black",
                                             position: "absolute",
                                             top: "50%",
                                             left: "50%",

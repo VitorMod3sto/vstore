@@ -131,7 +131,7 @@ export default function Page() {
                     {produtos.slice(0, 4).map((produto) => (
                         <Carousel.Item key={produto.id}>
                             <div style={{ padding: '30px' }}>
-                                <Link href={`/produtos/${produto.id}`}>
+                                <Link href={`/paginas/produtos/${produto.id}`}>
                                     <img
                                         src={produto.imagem}
                                         alt={produto.nome}
@@ -187,7 +187,7 @@ export default function Page() {
                     interval={null} indicators={false}
                     prevIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
@@ -197,7 +197,7 @@ export default function Page() {
                     }
                     nextIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
                             boxShadow: '0 2px 5px  rgba(0, 0, 0, 0.3)',
@@ -214,7 +214,7 @@ export default function Page() {
                                 {grupo.map(produto => (
                                     <Link key={produto.id} href={`/produtos/${produto.id}`}>
                                         <div style={{
-                                            border: '3px solid #003366',
+                                            border: '3px solid black',
                                             borderRadius: '8px',
                                             padding: '10px',
                                             textAlign: 'center',
@@ -279,7 +279,7 @@ export default function Page() {
                     indicators={false}
                     prevIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
@@ -289,7 +289,7 @@ export default function Page() {
                     }
                     nextIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
@@ -302,8 +302,8 @@ export default function Page() {
                         <Carousel.Item key={index} active={index === indexGrupoBlusas}>
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
                                 {grupo.map(produto => (
-                                    <Link key={produto.id} href={`/produtos/${produto.id}`}>
-                                        <div style={{ border: '3px solid #003366', borderRadius: '8px', padding: '0', textAlign: 'center', flex: '0 0 auto', margin: '0 1px' }}>
+                                    <Link key={produto.id} href={`/paginas/produtos/${produto.id}`}>
+                                        <div style={{ border: '3px solid black', borderRadius: '8px', padding: '0', textAlign: 'center', flex: '0 0 auto', margin: '0 1px' }}>
                                             <img src={produto.imagem} alt={produto.nome}
                                                 style={{ objectFit: 'contain', height: '260px', width: '100%', borderRadius: '5px' }} />
                                         </div>
@@ -335,7 +335,7 @@ export default function Page() {
                             <div key={produto.id} style={{
                                 padding: '20px',
                                 textAlign: 'center',
-                                border: '2px solid #003366',
+                                border: '2px solid black',
                                 borderRadius: '8px',
                                 margin: '10px',
                                 height: '420px',
@@ -372,22 +372,22 @@ export default function Page() {
                         ))}
                 </div>
                 <Link href={`/paginas/produtos`}>
-                        <button style={{
-                            fontFamily: 'Montserrat, sans-serif',
-                            fontWeight: 'bold',
-                            backgroundColor: 'black',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            padding: '8px 16px',
-                            cursor: 'pointer',
-                            height: '50px',
-                            marginLeft: '30px',
-                            marginBottom: '10px'
-                        }}>
-                            Saiba Mais
-                        </button>
-                    </Link>
+                    <button style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: 'bold',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        height: '50px',
+                        marginLeft: '30px',
+                        marginBottom: '10px'
+                    }}>
+                        Saiba Mais
+                    </button>
+                </Link>
             </div>
 
 

@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer style={{ backgroundColor: '#003366', color: '#ffffff', padding: '20px 0' }}>
+        <footer style={{ backgroundColor: 'black', color: '#ffffff', padding: '20px 0' }}>
             <Container>
                 <Row className="align-items-center">
                     <Col xs={12} md={4} className="text-center text-md-start">

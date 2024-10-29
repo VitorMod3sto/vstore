@@ -1,0 +1,17 @@
+<Row style={{ alignItems: 'flex-start' }}>
+    <Col xs={12} md={6} style={{ padding: '0' }}>
+        <img
+            src={produto.imagem}
+            alt={produto.nome}
+            style={{ width: '100%', border: '2px solid black', height: 'auto', maxHeight: '400px', objectFit: 'contain' }}
+        />
+    </Col>
+    <Col xs={12} md={6} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: '0', marginTop: '0' }}>
+        <h1 style={{ margin: '0', marginTop: '10px' }}>{produto.nome}</h1>
+        <p style={{ margin: '0' }}>Preço: R$ {produto.preco ? produto.preco.toFixed(2) : '0.00'}</p>
+        <p style={{ margin: '0' }}>Em até 10x de R$ {precoParcelado} sem juros</p>
+        <button style={{ padding: '10px 20px', marginTop: '10px' }}>
+            Adicionar ao Carrinho
+        </button>
+    </Col>
+</Row>
