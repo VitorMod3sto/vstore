@@ -119,7 +119,7 @@ export default function Pagina2(props) {
                                             {/* Se houver sugestão de produto irá exibir a div de sugestões  */}
 
                                             {sugestoes.map(produto => (
-                                                <Link key={produto.id} href={`/paginas/produtos/produto${produto.id}`}
+                                                <Link key={produto.id} href={`/paginas/produtos/${produto.id}`}
                                                     style={{ textDecoration: 'none', color: 'black' }}>
                                                     <div
                                                         style={{

@@ -71,7 +71,7 @@ export default function Page() {
     };
 
 
-    // APLICANDO A MESMA LÓGICA ACIMA MAS PRA EXIBIR APENAS BLUSAS DE TIME AGORA
+    // APLICANDO A MESMA LÓGICA ACIMA MAS PRA EXIBIR APENAS BLUSAS DE TIME AGORA:
     const [produtosBlusas, setProdutosBlusas] = useState([]);
 
     const [indexGrupoBlusas, setIndexGrupoBlusas] = useState(0);

@@ -1,136 +1,168 @@
-'use client'
+'use client';
 
+import { useState, useEffect } from 'react';
 import Pagina2 from "@/app/components/Pagina2";
-import { useEffect, useState } from "react";
-import { Carousel } from "react-bootstrap";
+import { Row, Col, Card, Button, Carousel, Modal } from 'react-bootstrap';
 import Link from 'next/link';
-import { FaChevronLeft, FaChevronRight, FaFireAlt, FaStar } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
+export default function Page({ params }) {
+    const [produto, setProduto] = useState({});
+    const [showModal, setShowModal] = useState(false);
+    const [tamanhoSelecionado, setTamanhoSelecionado] = useState('');
+    const [tamanhoChecked, setTamanhoChecked] = useState(false);
+    const [produtosCategoria, setProdutosCategoria] = useState([]);
+    const [indexGrupo, setIndexGrupo] = useState(0);
 
-
-export default function Page() {
-    const [produtos, setProdutos] = useState([]);
-    // Estado para armazenar os produtos
+    const produtosPorGrupo = 8; // Número de produtos por grupo para o carrossel
 
     useEffect(() => {
-        // useEffect para carregar os produtos do localStorage ao montar o componente
-        const dados = JSON.parse(localStorage.getItem('produtos')) || [];
-        // Carregando produtos do localStorage (usando JSON parse para converter de string para objeto JavaScript)
-        setProdutos(dados);
-        // Atualizando o estado dos produtos
-    }, []);
+        const produtos = JSON.parse(localStorage.getItem('produtos'));
+        const dados = produtos.find(produto => produto.id === params.id);
+        setProduto(dados);
 
+        // Filtra os produtos da mesma categoria
+        const produtosDaMesmaCategoria = produtos.filter(p => p.categoria === dados.categoria && p.id !== dados.id);
+        setProdutosCategoria(produtosDaMesmaCategoria);
+    }, [params.id]);
 
-    const [indexGrupo, setIndexGrupo] = useState(0);
-    // Estado para armazenar o índice do grupo de produtos no array de grupos de produtos (iniciado em 0)
-
-    const produtosPorGrupo = 8;
-    // Definindo que devem ser exibidos 8 produtos no Carrossel na variável produtosPorGrupo
-
+    // Agrupando produtos da mesma categoria
     const gruposDeProdutos = [];
-    // Criando variável pra armazenar os grupos de produtos
-    for (let i = 0; i < produtos.length; i += produtosPorGrupo) {
-        //Iterando todos os produtos em incrementos de 8 (definidos em produtosPorGrupo)
-        const grupo = [];
-        // Armazenando na variável grupo os produtos que serão exibidos
-        for (let j = 0; j < produtosPorGrupo; j++) {
-            // Criando grupo de 8 produtos
-            /* j será a variável que será meu "contador", iniciado em 0 e será incrementado até que J tenha os produtos desejados
-            (sendo 8 produtos já que defini produtosPorGrupo = 8 ), ou seja, repete o loop enquanto  j < produtosPorGrupo */
-            const index = (i + j) % produtos.length;
-            // Garantindo que terá 8 produtos mesmo que tenha que repetir os produtos
-            // Index armazena a posição do produto dentro do Array de produtos
-            /* i armazena a posição inicial do produto no grupo atual (exemplo: grupo index 0 de produtos contém 8 produtos, sendo 
-            produtos do index 0-7, ou seja, se i=8 o produto pertence ao grupo de produtos de indíce (index) 1),
-             j armazena a posição do produto dentro do grupo atual (exemplo: se estiver no grupo de index 1, qual posição o produto 
-             está dentro desse grupo).
-            Já soma i + j resulta em um índice global (do Array produtos).
-            O operador de módulo % garante que caso a soma ultrapasse o número de produtos totais (dentro do Array produtos),
-            volte pra o ínicio do array, repetindo os produtos  */
-            grupo.push(produtos[index]);
-            // Adicionando ao grupo, o produto acessado pelo index
-        }
-        gruposDeProdutos.push(grupo);
-        // Adicionando o grupo completo (8 produtos) ao array de grupos de produtos
+    for (let i = 0; i < produtosCategoria.length; i += produtosPorGrupo) {
+        gruposDeProdutos.push(produtosCategoria.slice(i, i + produtosPorGrupo));
     }
 
     const totalGrupos = gruposDeProdutos.length;
-    // Armazenando o total de grupos que foi criado
-
 
     const handlePrev = () => {
-        // Criando função que atualiza o setIndexGrupo pra exibir o grupo de produtos anterior (a partir do índice no array de grupos)
         setIndexGrupo((prev) => (prev === 0 ? totalGrupos - 1 : prev - 1));
-        // Definindo que caso já esteja no primeiro grupo, volte pro último
     };
 
     const handleNext = () => {
-        // Criando função que atualiza o setIndexGrupo pra exibir o próximo grupo de produtos 
         setIndexGrupo((prev) => (prev === totalGrupos - 1 ? 0 : prev + 1));
-        // Definindo que caso já esteja no último grupo, volte pro primeiro
     };
 
-    
+    const precoParcelado = produto.preco ? (produto.preco / 10).toFixed(2) : '0.00';
+
+    const handleShow = () => setShowModal(true);
+    const handleClose = () => {
+        setTamanhoChecked(false);
+        setShowModal(false);
+    };
+
+    const selecionarTamanho = () => {
+        if (tamanhoChecked) {
+            setTamanhoSelecionado(`${produto.tamanho} selecionado`);
+        } else {
+            setTamanhoSelecionado('');
+        }
+        handleClose();
+    };
 
     return (
-        <Pagina2 titulo="Home">
-            {/* PRIMEIRO CARROSSEL (produtos únicos sendo exibidos) */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
-                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', fontWeight: '900' }}>OS MAIS VENDIDOS</h2>
-
-                <Carousel data-bs-theme="dark" style={{ marginBottom: '10px', width: '100%', maxWidth: '1000px' }}
-                    interval={500} indicators={true}
-                    prevIcon={
-                        <div style={{ color: 'black' }}>
-                            <FaChevronLeft style={{ color: 'black', fontSize: '24px' }} />
-                        </div>
-                    }
-                    nextIcon={
-                        <div style={{ color: 'black' }}>
-                            <FaChevronRight style={{ color: 'black', fontSize: '24px' }} />
-                        </div>
-                    }
-                > {/* Definindo acima que irá ser exibido cada produto a cada 0.5s e deixando ser exibido o slider inferior
-                   indicando qual produto está sendo exibido. Também defini os botões de passar o slide por seta (icons) */}
-
-                    {/* Exibindo apenas os 3 primeiros produtos (Slice) */}
-                    {produtos.slice(0, 4).map((produto) => (
-                        <Carousel.Item key={produto.id}>
-                            <div style={{ padding: '30px' }}>
-                                <Link href={`/produtos/${produto.id}`}>
+        <Pagina2 titulo="Detalhe do Produto">
+            <Row className="align-items-start">
+                <Col md={7} style={{ marginLeft: '67px' }}>
+                    <Card style={{ border: "3px solid black" }}>
+                        <Card.Body style={{ padding: 0 }}>
+                            <Carousel
+                                prevIcon={<FaChevronLeft style={{ fontSize: '24px', color: 'black' }} />}
+                                nextIcon={<FaChevronRight style={{ fontSize: '24px', color: 'black' }} />}
+                                interval={2000}
+                            >
+                                <Carousel.Item>
                                     <img
                                         src={produto.imagem}
                                         alt={produto.nome}
-                                        style={{
-                                            objectFit: 'contain',
-                                            height: '400px',
-                                            width: '100%',
-                                        }}
+                                        style={{ width: '100%', height: '550px', objectFit: 'contain' }}
                                     />
-                                </Link>
-                                <div style={{ textAlign: 'center', marginTop: '10px', color: 'black', fontWeight: 'bold' }}>
-                                    <h5 style={{ fontFamily: 'Poppins, sans-serif' }}>{produto.nome}</h5>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif' }}> R$ {produto.preco.toFixed(2)} </p>
-                                </div>
+                                </Carousel.Item>
+                                <Carousel.Item>
+                                    <img
+                                        src={produto.imagem}
+                                        alt={produto.nome}
+                                        style={{ width: '100%', height: '550px', objectFit: 'contain' }}
+                                    />
+                                </Carousel.Item>
+                            </Carousel>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={5} style={{ width: '500px', marginLeft: '-15px' }}>
+                    <Card style={{ border: 'none' }}>
+                        <Card.Body>
+                            <h1 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '28px', marginBottom: '0' }}>{produto.nome}</h1>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '28px', fontWeight: 'bold', marginBottom: '0' }}>
+                                R$ {produto.preco}
+                            </p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', marginTop: '-5px' }}>
+                                ou em até 10x de: <b> R$ {(produto.preco / 10).toFixed(2)}</b>
+                            </p>
+                            <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
+                            <div style={{ fontFamily: 'Montserrat, sans-serif', marginTop: '5px', marginBottom: '2px' }}>
+                                <span style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ cursor: 'pointer' }}>
+                                        <img
+                                            src={produto.imagem}
+                                            alt={produto.cor}
+                                            style={{
+                                                width: '70px',
+                                                height: '70px',
+                                                marginBottom: '5px',
+                                                border: '2px solid grey'
+                                            }}
+                                        />
+                                    </span>
+                                    <span>
+                                        <b>Cores (1): </b>{produto.cor}
+                                    </span>
+                                </span>
                             </div>
-                        </Carousel.Item>
-                    ))}
-                </Carousel>
-            </div><br />
+                            <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
+                            <div style={{ fontFamily: 'Montserrat, sans-serif', marginTop: '3px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={handleShow}>
+                                <div>
+                                    <b>Tamanho:</b>
+                                    <div style={{ marginTop: '5px' }}>
+                                        {tamanhoSelecionado || `${produto.tamanho} disponível`}
+                                    </div>
+                                </div>
+                                <span style={{ marginLeft: '5px', marginRight: '15px', fontSize: '18px', color: 'black', marginTop: '10px', fontSize: '25px' }}>➔</span>
+                            </div>
+                            <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
+                            <Link href={`/`}>
+                                <button style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: 'bold',
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    padding: '10px 20px',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    height: '50px',
+                                    marginTop: '170px'
+                                }}>
+                                    Comprar
+                                </button>
+                            </Link>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
 
-
-            {/* SEGUNDO CARROSSEL (produtos sendo exibidos em grupos de 8) */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 15px' }}>
-
-                <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', margin: 0, fontWeight: '900' }}>
+            {/* Carrossel de produtos da mesma categoria */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 15px' }}>
+                <h2 style={{
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: '900',
+                    margin: '0',
+                }}>
                     MAIS PRODUTOS
                 </h2>
-
                 <Link href={`/paginas/produtos`}>
                     <button style={{
                         fontFamily: 'Montserrat, sans-serif',
-                        fontWeight: '900',
                         fontWeight: 'bold',
                         backgroundColor: 'black',
                         color: 'white',
@@ -138,22 +170,21 @@ export default function Page() {
                         borderRadius: '5px',
                         padding: '8px 16px',
                         cursor: 'pointer',
-                        marginLeft: '10px',
-                        height: '50px'
+                        marginLeft: '15px',
+                        height: '50px',
+                        marginBottom: '5px'
                     }}>
                         Saiba Mais
                     </button>
                 </Link>
             </div>
 
-
-
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '200px' }}
+                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '220px', marginTop: '0', marginBottom: '0' }}
                     interval={null} indicators={false}
                     prevIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
@@ -163,24 +194,22 @@ export default function Page() {
                     }
                     nextIcon={
                         <div style={{
-                            backgroundColor: '#003366',
+                            backgroundColor: 'black',
                             borderRadius: '50%',
                             padding: '10px',
-                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+                            boxShadow: '0 2px 5px  rgba(0, 0, 0, 0.3)',
                         }} onClick={handleNext}>
                             <FaChevronRight style={{ color: 'white', fontSize: '24px' }} />
                         </div>
                     }
                 >
-                    {/* Definindo abaixo que os produtos (suas imagens com Link) serão exibidos em grupos de 8 (gruposDeProdutos) */}
-                    {/* Definindo a key = index porque os grupos não possuem id, então usamos a posição no array*/}
                     {gruposDeProdutos.map((grupo, index) => (
                         <Carousel.Item key={index} active={index === indexGrupo}>
                             <div style={{ display: 'flex', justifyContent: 'space-around', padding: '10px' }}>
                                 {grupo.map(produto => (
-                                    <Link key={produto.id} href={`/produtos/${produto.id}`}>
+                                    <Link key={produto.id} href={`/paginas/produtos/${produto.id}`}>
                                         <div style={{
-                                            border: '3px solid #003366',
+                                            border: '3px solid black',
                                             borderRadius: '8px',
                                             padding: '10px',
                                             textAlign: 'center',
@@ -205,6 +234,57 @@ export default function Page() {
                     ))}
                 </Carousel>
             </div>
+            <br /><br />
+
+            {/* Modal para seleção de tamanho */}
+            <Modal show={showModal} onHide={handleClose}>
+                <Modal.Header>
+                    <Modal.Title style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 'bold', fontWeight: '900' }}>
+                        SELECIONE O TAMANHO
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 'bold', fontWeight: '900', marginLeft: '15px' }}>
+                        Escolha o tamanho:</p>
+                    <label style={{ marginLeft: '15px', cursor: 'pointer' }}>
+                        <input
+                            type="checkbox"
+                            checked={tamanhoChecked}
+                            onChange={() => setTamanhoChecked(!tamanhoChecked)}
+                        /> {produto.tamanho}
+                    </label>
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Button variant="secondary" onClick={handleClose} style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: 'bold',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        height: '40px',
+                        marginBottom: '5px'
+                    }}>
+                        Fechar
+                    </Button>
+                    <Button variant="primary" onClick={selecionarTamanho} style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: 'bold',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        height: '40px',
+                        marginBottom: '5px'
+                    }}>
+                        Selecionar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Pagina2>
     );
 }
