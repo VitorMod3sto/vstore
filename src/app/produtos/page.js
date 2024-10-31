@@ -113,7 +113,7 @@ export default function Page() {
                 </Link>
 
                 {/* DEFININDO EXIBIÇÃO DOS PRODUTOS (USANDO ROW, COL E CARD) */}
-                <Row xs={1} md={2} lg={5} className="g-3">
+                <Row xs={1} md={2} lg={4} className="g-3">
                     {produtosFiltrados.map(item => (
                         <Col key={item.id}>
                             <Card style={{ backgroundColor: '#003366', color: 'white', border: '1px solid white', height: '410px' }}>
