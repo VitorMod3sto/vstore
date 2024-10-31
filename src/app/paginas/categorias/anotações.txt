@@ -1,0 +1,35 @@
+'use client';
+
+import Pagina2 from "@/app/components/Pagina2";
+import { useEffect, useState } from 'react';
+
+export default function Page({ params }) {
+    const [produtos, setProdutos] = useState([]);
+
+    useEffect(() => {
+        const categorias = JSON.parse(localStorage.getItem('categorias')) || [];
+        const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+        const categoriaNome = decodeURIComponent(params.nome);
+
+
+        // Filtrar produtos pela categoria recebida
+        const produtosCategoria = produtos.filter(produto => produto.categoria === categoriaNome);
+
+        setProdutos(produtosCategoria);
+    }, []);
+
+    return (
+        <Pagina2 titulo='Categoria'>
+            <h1>{decodeURIComponent(params.nome)}</h1>
+            <div className="produtos-grid">
+                {produtos.map(produto => (
+                    <div key={produto.id} className="produto-card">
+                        <h3>{produto.nome}</h3>
+                    </div>
+                ))}
+            </div>
+
+        </Pagina2>
+    );
+}

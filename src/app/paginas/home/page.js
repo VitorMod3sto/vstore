@@ -12,12 +12,20 @@ export default function Page() {
     const [produtos, setProdutos] = useState([]);
     // Estado para armazenar os produtos
 
+    const [categorias, setCategorias] = useState([]);
+    // Estado para armazenar as categorias
+
     useEffect(() => {
         // useEffect para carregar os produtos do localStorage ao montar o componente
         const dados = JSON.parse(localStorage.getItem('produtos')) || [];
         // Carregando produtos do localStorage (usando JSON parse para converter de string para objeto JavaScript)
         setProdutos(dados);
         // Atualizando o estado dos produtos
+
+        const dadosCategorias = JSON.parse(localStorage.getItem('categorias')) || [];
+         // Carregando categorias do localStorage (usando JSON parse para converter de string para objeto JavaScript)
+        setCategorias(dadosCategorias);
+        // Atualizando o estado das categorias
     }, []);
 
 
@@ -390,6 +398,26 @@ export default function Page() {
                 </Link>
             </div>
 
+            {/* BOTÃO PRA VER CADA CATEGORIA */}
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', marginTop: '20px' }}>
+                {categorias.map((categoria) => (
+                    <Link key={categoria.id} href={`/paginas/categorias/${categoria.nome}`}>
+                        <button style={{
+                            fontFamily: 'Montserrat, sans-serif',
+                            fontWeight: 'bold',
+                            backgroundColor: 'black',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            padding: '10px 20px',
+                            margin: '5px',
+                            cursor: 'pointer',
+                        }}>
+                            {categoria.nome}
+                        </button>
+                    </Link>
+                ))}
+            </div>
 
         </Pagina2>
     );
