@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Pagina2 from "@/app/components/Pagina2";
-import { Row, Col, Card, Button, Carousel, Modal } from 'react-bootstrap';
+import { Row, Col, Card, Button, Carousel, Modal, Dropdown } from 'react-bootstrap';
 import Link from 'next/link';
-import { FaChevronLeft, FaChevronRight, FaShoppingCart } from 'react-icons/fa';
+import { FaCheckCircle, FaChevronLeft, FaChevronRight, FaEdgeLegacy, FaExclamationCircle, FaShoppingCart } from 'react-icons/fa';
+import { RiMastercardFill } from "react-icons/ri";
+import { RiVisaFill } from "react-icons/ri";
+import { BiSolidPurchaseTagAlt } from 'react-icons/bi';
+
 
 export default function Page({ params }) {
     const [produto, setProduto] = useState({});
@@ -109,6 +113,52 @@ export default function Page({ params }) {
         // Chama a função de fechar a Modal
     };
 
+    const [ModalPagamento, setModalPagamento] = useState(false);
+    const [dadosCartao, setdadosCartao] = useState({ number: '', expiry: '', cvv: '', namecard: '', brand: '' });
+    const [mensagem, setMensagem] = useState('');
+    const [mensagemTipo, setmensagemTipo] = useState('');
+    const [bandeira, setBandeira] = useState('');
+
+    const handlePaymentModal = () => {
+        setModalPagamento(true);
+    };
+
+    const handlePaymentClose = () => {
+        setModalPagamento(false);
+        setdadosCartao({ number: '', expiry: '', cvv: '', name: '', brand: 'Selecione a bandeira', });
+        setBandeira('');
+        setMensagem('');
+        setmensagemTipo('');
+    };
+
+    const handleCardDetailChange = (e) => {
+        const { name, value } = e.target;
+        setdadosCartao(prev => ({ ...prev, [name]: value }));
+    };
+
+    const validateCard = () => {
+        const { number, brand } = dadosCartao;
+
+        const brandMapping = {
+            visa: /^4/,
+            master: /^[25]/
+        };
+
+        const isValid = brandMapping[brand] ? brandMapping[brand].test(number) : false;
+
+        if (!isValid) {
+            setMensagem('Dados incorretos');
+            setmensagemTipo('error');
+        } else {
+            setMensagem('Compra efetuada com sucesso, verifique seu email');
+            setmensagemTipo('success');
+            setTimeout(() => {
+                handlePaymentClose();
+            }, 3000);
+        }
+    };
+
+
     return (
         <Pagina2 titulo="Detalhe do Produto">
 
@@ -211,23 +261,23 @@ export default function Page({ params }) {
                                 </button>
                             </Link>
 
-                            <Link href={`/`}>
-                                <button style={{
-                                    fontFamily: 'Montserrat, sans-serif',
-                                    fontWeight: 'bold',
-                                    backgroundColor: 'black',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    padding: '10px 20px',
-                                    cursor: 'pointer',
-                                    width: '100%',
-                                    height: '50px',
-                                    marginTop: '10px'
-                                }}>
-                                    Comprar
-                                </button>
-                            </Link>
+
+                            <button onClick={handlePaymentModal} style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '10px 20px',
+                                cursor: 'pointer',
+                                width: '100%',
+                                height: '50px',
+                                marginTop: '10px'
+                            }}>
+                                Comprar
+                            </button>
+
 
                         </Card.Body>
                     </Card>
@@ -323,7 +373,7 @@ export default function Page({ params }) {
                         padding: '8px 16px',
                         cursor: 'pointer',
                         height: '50px',
-                        margin: '0 10px' 
+                        margin: '0 10px'
                     }}>
                         INÍCIO
                     </button>
@@ -339,7 +389,7 @@ export default function Page({ params }) {
                         padding: '8px 16px',
                         cursor: 'pointer',
                         height: '50px',
-                        margin: '0 10px' 
+                        margin: '0 10px'
                     }}>
                         PRODUTOS
                     </button>
@@ -355,7 +405,7 @@ export default function Page({ params }) {
                         padding: '8px 16px',
                         cursor: 'pointer',
                         height: '50px',
-                        margin: '0 10px' 
+                        margin: '0 10px'
                     }}>
                         SOBRE NÓS
                     </button>
@@ -414,8 +464,127 @@ export default function Page({ params }) {
                         Selecionar
                     </Button>
                 </Modal.Footer>
-
             </Modal>
+
+            {/* Modal de Pagamento */}
+
+            <Modal show={ModalPagamento} onHide={handlePaymentClose} dialogClassName="custom-modal">
+                <Modal.Header style={{ color: 'white', backgroundColor: 'black' }} closeButton>
+                    <Modal.Title>CONFIRMAR COMPRA <BiSolidPurchaseTagAlt /></Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ backgroundColor: 'black', color: 'white' }}>
+                    <h5>Escolha a forma de pagamento:</h5>
+                    <div style={{ marginBottom: '20px' }}>
+                        <Dropdown>
+                            <Dropdown.Toggle
+                                variant="secondary"
+                                id="dropdown-basic"
+                                style={{
+                                    width: '100%',
+                                    borderRadius: '5px',
+                                    backgroundColor: bandeira === 'Visa' ? 'darkblue' :
+                                        bandeira === 'MasterCard' ? 'orange' :
+                                            bandeira === 'Elo' ? 'lightgrey' : 'white',
+                                    color: bandeira ? 'white' : 'black'
+                                }}
+                            >
+                                {bandeira ? bandeira : "Selecione a bandeira"}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Dropdown.Item
+                                    onClick={() => {
+                                        setBandeira('Visa');
+                                        setdadosCartao(prev => ({ ...prev, brand: 'visa' }));
+                                    }}
+                                    style={{ backgroundColor: 'white', color: 'black' }}
+                                >
+                                    <RiVisaFill style={{ marginRight: '5px', color: 'black' }} /> Visa
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    onClick={() => {
+                                        setBandeira('MasterCard');
+                                        setdadosCartao(prev => ({ ...prev, brand: 'master' }));
+                                    }}
+                                    style={{ backgroundColor: 'white', color: 'black' }}
+                                >
+                                    <RiMastercardFill style={{ marginRight: '5px' }} /> MasterCard
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    onClick={() => {
+                                        setBandeira('Elo');
+                                        setdadosCartao(prev => ({ ...prev, brand: 'elo' }));
+                                    }}
+                                    style={{ backgroundColor: 'white', color: 'black' }}
+                                >
+                                    <FaEdgeLegacy style={{ marginRight: '5px', color: 'black' }} /> Elo
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+
+                    </div>
+                    <div style={{ marginTop: '20px' }}>
+                        <input
+                            type="text"
+                            name="number"
+                            placeholder="Número do Cartão"
+                            value={dadosCartao.number}
+                            onChange={handleCardDetailChange}
+                            style={{ marginBottom: '10px', width: '100%', borderRadius: '5px', padding: '10px' }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <input
+                                type="text"
+                                name="expiry"
+                                placeholder="Data de Vencimento (MM/AA)"
+                                value={dadosCartao.expiry}
+                                onChange={handleCardDetailChange}
+                                style={{ marginBottom: '10px', width: '48%', borderRadius: '5px', padding: '10px' }}
+                            />
+                            <input
+                                type="text"
+                                name="cvv"
+                                placeholder="CVV"
+                                value={dadosCartao.cvv}
+                                onChange={handleCardDetailChange}
+                                style={{ marginBottom: '10px', width: '48%', borderRadius: '5px', padding: '10px' }}
+                            />
+                        </div>
+                        <input
+                            type="text"
+                            name="namecard"
+                            placeholder="Nome no Cartão"
+                            value={dadosCartao.namecard}
+                            onChange={handleCardDetailChange}
+                            style={{ marginBottom: '10px', width: '100%', borderRadius: '5px', padding: '10px' }}
+                        />
+                    </div>
+                    {mensagem && (
+                        <div style={{
+                            marginTop: '20px',
+                            color: mensagemTipo === 'success' ? 'green' : 'red',
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}>
+                            {mensagemTipo === 'success' ? (
+                                <FaCheckCircle style={{ marginRight: '10px', fontSize: '20px' }} />
+                            ) : (
+                                <FaExclamationCircle style={{ marginRight: '10px', fontSize: '20px' }} />
+                            )}
+                            <span>{mensagem}</span>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer style={{ backgroundColor: 'black' }}>
+                    <Button style={{ backgroundColor: 'black', color: 'white', border: '1px solid white' }} onClick={handlePaymentClose}>
+                        Fechar
+                    </Button>
+                    <Button style={{ border: '1px solid white', backgroundColor: '#1e7e34' }} onClick={validateCard}>
+                        Confirmar Pagamento
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
         </Pagina2>
     );
 }

@@ -327,7 +327,7 @@ export default function Page() {
             {/*  QUARTA SEÇÃO */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <h2 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900' }}>
-                    COLEÇÃO OAKLEY
+                   NOVA COLEÇÃO OAKLEY
                 </h2>
                 <div style={{
                     display: 'flex',
