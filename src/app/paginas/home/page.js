@@ -191,7 +191,7 @@ export default function Page() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '220px', marginTop: '0', marginBottom: '0' }} // Remover margens
+                <Carousel data-bs-theme="dark" style={{ width: '100%', height: '220px', marginTop: '0', marginBottom: '0' }} 
                     interval={null} indicators={false}
                     prevIcon={
                         <div style={{

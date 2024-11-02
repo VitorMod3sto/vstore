@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { Row, Col, Card, Dropdown, Container } from 'react-bootstrap';
 
-export default function Page({ params }) {
+export default function Page() {
     const [produtos, setProdutos] = useState([]);
     const [marcas, setMarcas] = useState([]);
     const [tamanhos, setTamanhos] = useState([]);
@@ -15,22 +15,18 @@ export default function Page({ params }) {
 
     useEffect(() => {
         const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
-        const categoriaNome = decodeURIComponent(params.nome);
-        const produtosCategoria = produtosLocal.filter(produto => produto.categoria === categoriaNome);
+        const marcasLocal = [...new Set(produtosLocal.map(produto => produto.marca))];
+        const tamanhosLocal = [...new Set(produtosLocal.map(produto => produto.tamanho))];
+        const tamanhosUnico = [...tamanhosLocal, 'Tamanho único'.toUpperCase()];
 
-        setProdutos(produtosCategoria);
-
-        const marcasLocal = JSON.parse(localStorage.getItem('marcas')) || [];
-        const tamanhosLocal = [...new Set(produtosCategoria.map(produto => produto.tamanho))];
-
+        setProdutos(produtosLocal);
         setMarcas(marcasLocal);
         setTamanhos(tamanhosLocal);
-    }, [params.nome]);
+        setTamanhos(tamanhosUnico);
+    }, []);
 
     const filtrarProdutos = () => {
-        const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
-        const categoriaNome = decodeURIComponent(params.nome);
-        let produtosFiltrados = produtosLocal.filter(produto => produto.categoria === categoriaNome);
+        let produtosFiltrados = JSON.parse(localStorage.getItem('produtos')) || [];
 
         if (marcaSelecionada) {
             produtosFiltrados = produtosFiltrados.filter(produto => produto.marca === marcaSelecionada);
@@ -52,13 +48,13 @@ export default function Page({ params }) {
     }, [marcaSelecionada, tamanhoSelecionado, ordemPreco]);
 
     return (
-        <Pagina2 titulo='Categoria'>
+        <Pagina2 titulo='Produtos'>
             <Container fluid className="px-0">
                 <h2 style={{
                     fontFamily: 'Montserrat, sans-serif', fontWeight: '900',
                     textAlign: 'center', fontSize: '35px', marginTop: '05px', marginBottom: '20px'
                 }}>
-                    {decodeURIComponent(params.nome)}
+                    Todos os Produtos
                 </h2>
 
                 {/* Row para os Dropdowns lado a lado */}
@@ -78,8 +74,8 @@ export default function Page({ params }) {
                         <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
                             <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setMarcaSelecionada(null); setOrdemPreco(null); }}>Todas</Dropdown.Item>
                             {marcas.map(marca => (
-                                <Dropdown.Item key={marca.id} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setMarcaSelecionada(marca.nome); setOrdemPreco(null); }}>
-                                    {marca.nome}
+                                <Dropdown.Item key={marca} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setMarcaSelecionada(marca); setOrdemPreco(null); }}>
+                                    {marca}
                                 </Dropdown.Item>
                             ))}
                         </Dropdown.Menu>
@@ -120,14 +116,12 @@ export default function Page({ params }) {
                             {ordemPreco ? (ordemPreco === 'maior' ? 'Maior Primeiro' : 'Menor Primeiro') : 'Preço'}
                         </Dropdown.Toggle>
                         <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); setOrdemPreco(null); }}>Todos</Dropdown.Item>
+                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); }}>Todos</Dropdown.Item>
                             <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('menor')}>Menor Preço</Dropdown.Item>
                             <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('maior')}>Maior Preço</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                 </div>
-
-
 
                 <Row>
                     {produtos.map(produto => (
