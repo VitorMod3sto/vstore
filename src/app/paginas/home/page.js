@@ -252,7 +252,7 @@ export default function Page() {
             {/* TERCEIRO CARROSSEL (blusas de time sendo exibidos em grupos de 5) */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', margin: '0 15px' }}>
-                    <Link href={`/paginas/produtos`}>
+                    <Link href={`categorias/Blusas%20de%20time`}>
                         <button style={{
                             fontFamily: 'Montserrat, sans-serif',
                             fontWeight: 'bold',

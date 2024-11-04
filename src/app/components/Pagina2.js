@@ -80,7 +80,7 @@ export default function Pagina2(props) {
 
 
                     {/* Criando ícone da Loja */}
-                    <Navbar.Brand href="/">
+                    <Navbar.Brand href="/paginas/home">
                         <BiLogoVuejs style={{ fontSize: "40px", marginLeft: "20" }} />
                     </Navbar.Brand>
 
@@ -266,7 +266,9 @@ export default function Pagina2(props) {
                             <AiFillHome style={{ marginBottom: "06px" }} /> Minha Conta
                         </li>
                         <li>
-                            <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos
+                           <Link href={`/paginas/produtos`} style={{textDecoration:'none', color:'white'}}>
+                           <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos 
+                           </Link> 
                         </li>
                         <li>
                             <MdLocalGroceryStore style={{ marginBottom: "03px" }} /> Meu Carrinho

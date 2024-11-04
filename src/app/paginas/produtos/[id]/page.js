@@ -114,14 +114,24 @@ export default function Page({ params }) {
     };
 
     const [ModalPagamento, setModalPagamento] = useState(false);
+    // Estado pra controlar a Modal (iniciando com ela fechada = false)
+
     const [dadosCartao, setdadosCartao] = useState({ number: '', expiry: '', cvv: '', namecard: '', brand: '' });
+    // Estado pra armazenar os dados do cartão (número, data de vencimento, cvv, nome do cartao e bandeira)
+
     const [mensagem, setMensagem] = useState('');
+    // Estado para armazenar a mensagem de compra autorizada ou negado
+
     const [mensagemTipo, setmensagemTipo] = useState('');
+    // Estado para armazenar o tipo de mensagem (se foi aprovado ou negado)
+
     const [bandeira, setBandeira] = useState('');
+    // Estado para armazenar a bandeira do cartão
 
     const handlePaymentModal = () => {
         setModalPagamento(true);
     };
+    // Atualizando estado da Modal de pagamento para true (fazendo ela aparecer)
 
     const handlePaymentClose = () => {
         setModalPagamento(false);
@@ -130,34 +140,47 @@ export default function Page({ params }) {
         setMensagem('');
         setmensagemTipo('');
     };
+    // Atualizando estado da Modal pra false (fechando) e resetando os campos digitados
 
     const handleCardDetailChange = (e) => {
         const { name, value } = e.target;
+        // Extraindo o campo nome de dadosCartao 
         setdadosCartao(prev => ({ ...prev, [name]: value }));
     };
+    //  Atualizando os dados do cartão sempre que alterar algum valor do campo nome
+    // Na qual atualiza o campo alterado e copia os demais inalterados (com base nos valores salvos pela última vez nos dadosCartao)
 
     const validateCard = () => {
         const { number, brand } = dadosCartao;
-
+        // Extraindo o campo numero e bandeira de dadosCartao 
         const brandMapping = {
             visa: /^4/,
             master: /^[25]/
         };
+        // Definindo um objeto que guarda o numero inicial do cartão, e define que Master = 5 ou 2 e Visa = 4
+        // Usado logo abaixo pra testar se o numero do cartao corresponde a sua devida bandeira
 
         const isValid = brandMapping[brand] ? brandMapping[brand].test(number) : false;
+        // Armazenando se o teste da bandeira selecionada corresponde a Master ou Visa (true ou false) e se sim, testa o numero do cartao
+        // com a função de sua bandeira correspondente
 
+        // Se a bandeira corresponder o isValid = true, senão isValid = false
         if (!isValid) {
-            setMensagem('Dados incorretos');
+            // Se for false = Dados incorretos (não passou na função de teste como true)
+            setMensagem('Dados incorretos, verifique e tente novamente');
             setmensagemTipo('error');
+            // Exibe a mensagem de erro (criada separado de sucess para estilizar mais a frente no código)
         } else {
+            // Se for true = Dados corretos (passou na validação)
             setMensagem('Compra efetuada com sucesso, verifique seu email');
             setmensagemTipo('success');
+            // Exibe a mensagem de sucesso
             setTimeout(() => {
                 handlePaymentClose();
             }, 3000);
+            // Definindo que após sucesso, exibe a mensagem e fecha a modal (puxando a função handlePaymentClose) após 3s
         }
     };
-
 
     return (
         <Pagina2 titulo="Detalhe do Produto">
@@ -241,25 +264,25 @@ export default function Page({ params }) {
                             </div>
 
                             <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
-                            <Link href={`/`}>
-                                <button style={{
-                                    fontFamily: 'Montserrat, sans-serif',
-                                    fontWeight: 'bold',
-                                    backgroundColor: 'black',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    padding: '10px 20px',
-                                    cursor: 'pointer',
-                                    width: '100%',
-                                    height: '50px',
-                                    marginTop: '115px',
-                                    marginBottom: '0'
-                                }}>
-                                    Adicionar ao carrinho <FaShoppingCart
-                                        style={{ fontSize: '20px' }} />
-                                </button>
-                            </Link>
+
+                            <button  style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '10px 20px',
+                                cursor: 'pointer',
+                                width: '100%',
+                                height: '50px',
+                                marginTop: '80px',
+                                marginBottom: '0'
+                            }}>
+                                Adicionar ao carrinho <FaShoppingCart
+                                    style={{ fontSize: '20px' }} />
+                            </button>
+
 
 
                             <button onClick={handlePaymentModal} style={{
@@ -466,14 +489,16 @@ export default function Page({ params }) {
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal de Pagamento */}
-
+            {/* MODAL DE PAGAMENTO */}
             <Modal show={ModalPagamento} onHide={handlePaymentClose} dialogClassName="custom-modal">
+
                 <Modal.Header style={{ color: 'white', backgroundColor: 'black' }} closeButton>
                     <Modal.Title>CONFIRMAR COMPRA <BiSolidPurchaseTagAlt /></Modal.Title>
                 </Modal.Header>
+
                 <Modal.Body style={{ backgroundColor: 'black', color: 'white' }}>
                     <h5>Escolha a forma de pagamento:</h5>
+
                     <div style={{ marginBottom: '20px' }}>
                         <Dropdown>
                             <Dropdown.Toggle
@@ -486,12 +511,16 @@ export default function Page({ params }) {
                                         bandeira === 'MasterCard' ? 'orange' :
                                             bandeira === 'Elo' ? 'lightgrey' : 'white',
                                     color: bandeira ? 'white' : 'black'
+
                                 }}
                             >
                                 {bandeira ? bandeira : "Selecione a bandeira"}
+                                {/* Verificando qual a bandeira do cartão e definindo cor de fundo para cada uma, se nenhuma for 
+                                selecionada, fica preto e branco. Se nenhuma bandeira for selecionada, exibe a mensagem acima*/}
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
+
                                 <Dropdown.Item
                                     onClick={() => {
                                         setBandeira('Visa');
@@ -501,6 +530,7 @@ export default function Page({ params }) {
                                 >
                                     <RiVisaFill style={{ marginRight: '5px', color: 'black' }} /> Visa
                                 </Dropdown.Item>
+
                                 <Dropdown.Item
                                     onClick={() => {
                                         setBandeira('MasterCard');
@@ -510,6 +540,7 @@ export default function Page({ params }) {
                                 >
                                     <RiMastercardFill style={{ marginRight: '5px' }} /> MasterCard
                                 </Dropdown.Item>
+
                                 <Dropdown.Item
                                     onClick={() => {
                                         setBandeira('Elo');
@@ -519,10 +550,11 @@ export default function Page({ params }) {
                                 >
                                     <FaEdgeLegacy style={{ marginRight: '5px', color: 'black' }} /> Elo
                                 </Dropdown.Item>
+
                             </Dropdown.Menu>
                         </Dropdown>
-
                     </div>
+
                     <div style={{ marginTop: '20px' }}>
                         <input
                             type="text"
@@ -574,14 +606,20 @@ export default function Page({ params }) {
                             <span>{mensagem}</span>
                         </div>
                     )}
+                    {/* Verifica se há alguma mensagem a ser exibida, se for true, verifica qual tipo de mensagem 
+                    e a exibe em uma div (cada mensagem tem um estilo) */}
                 </Modal.Body>
+
                 <Modal.Footer style={{ backgroundColor: 'black' }}>
+
                     <Button style={{ backgroundColor: 'black', color: 'white', border: '1px solid white' }} onClick={handlePaymentClose}>
                         Fechar
                     </Button>
+
                     <Button style={{ border: '1px solid white', backgroundColor: '#1e7e34' }} onClick={validateCard}>
                         Confirmar Pagamento
                     </Button>
+
                 </Modal.Footer>
             </Modal>
 
