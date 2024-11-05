@@ -49,55 +49,48 @@ export default function Pagina2(props) {
     }, [search]);
     // Definindo que o useEffect será chamado sempre que o valor da pesquisa (search) mudar
 
+
+
     // Função para carregar e atualizar a quantidade total de itens no carrinho
-    const [quantidadeCarrinho, setQuantidadeCarrinho] = useState(0); // Estado para a quantidade de itens no carrinho
+    const [itensCarrinho, setItensCarrinho] = useState([]);
+    const [quantidadeCarrinho, setQuantidadeCarrinho] = useState(0);
+    const [carrinhoVisivel, setCarrinhoVisivel] = useState(false);
 
-
-    const atualizarCarrinho = () => {
-        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-        const totalItens = itensCarrinho.reduce((acc, item) => acc + item.quantidade, 0);
-        setQuantidadeCarrinho(totalItens);
+    // Função para carregar os itens do carrinho do localStorage
+    const carregarCarrinho = () => {
+        const itens = JSON.parse(localStorage.getItem('carrinho')) || [];
+        setItensCarrinho(itens);  // Atualiza a lista de produtos no carrinho
+        const totalItens = itens.reduce((acc, item) => acc + item.quantidade, 0);
+        setQuantidadeCarrinho(totalItens);  // Atualiza o total de itens no carrinho
     };
 
-    // Adiciona um ouvinte ao evento de mudança no localStorage
-    useEffect(() => {
-        // Atualiza a quantidade no início da carga
-        atualizarCarrinho();
 
-        // Função para tratar mudanças no carrinho no localStorage
+    // Função para monitorar mudanças no localStorage (se outro lugar modificar o carrinho)
+    useEffect(() => {
+        // Atualiza o carrinho ao carregar a página
+        carregarCarrinho();
+
+        // Função para tratar a mudança no localStorage
         const handleStorageChange = (e) => {
             if (e.key === 'carrinho') {
-                atualizarCarrinho(); // Atualiza o contador de itens
+                carregarCarrinho();  // Atualiza os itens e quantidade do carrinho
             }
         };
 
         // Escuta mudanças no localStorage
         window.addEventListener('storage', handleStorageChange);
 
-        // Limpar a escuta quando o componente for desmontado
+        // Limpar o ouvinte de evento quando o componente for desmontado
         return () => {
             window.removeEventListener('storage', handleStorageChange);
         };
-    }, []); // Esse useEffect roda uma vez ao carregar a página
+    }, []); // Esse useEffect só vai rodar uma vez, quando o componente for montado
 
-    // Função para adicionar um produto ao carrinho
-    const adicionarAoCarrinho = (produto) => {
-        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-        const produtoExistente = itensCarrinho.find(item => item.id === produto.id);
-
-        if (produtoExistente) {
-            produtoExistente.quantidade += 1; // Se o produto já estiver no carrinho, aumenta a quantidade
-        } else {
-            itensCarrinho.push({ ...produto, quantidade: 1 }); // Caso contrário, adiciona o produto com quantidade 1
-        }
-
-        // Atualiza o carrinho no localStorage
-        localStorage.setItem('carrinho', JSON.stringify(itensCarrinho));
-
-        // Atualiza o contador de itens no estado
-        atualizarCarrinho();
+    // Exibe ou esconde o quadrado do carrinho ao clicar no ícone
+    const toggleCarrinho = () => {
+        setCarrinhoVisivel(!carrinhoVisivel);
+        carregarCarrinho(); // Sempre que o carrinho for clicado, recarrega os itens
     };
-
 
     return (
         // Começando componente de Página (Menu + Footer)
@@ -216,7 +209,7 @@ export default function Pagina2(props) {
                             </Form>
                         </div>
 
-                        {/* Criando botão de Carrinho de compras*/}
+                        {/* Criando botão de Carrinho de compras */}
                         <div
                             style={{
                                 display: "flex",
@@ -227,9 +220,11 @@ export default function Pagina2(props) {
                                 borderRadius: "50%",
                                 backgroundColor: "white",
                                 marginLeft: "10px",
-                                marginTop: "05px",
+                                marginTop: "5px",
                                 position: "relative",
+                                cursor:'pointer',
                             }}
+                            onClick={toggleCarrinho} // Aciona a visibilidade do quadrado e carrega os produtos
                         >
                             <FaShoppingCart
                                 style={{
@@ -250,12 +245,79 @@ export default function Pagina2(props) {
                                         fontSize: "14px",
                                     }}
                                 >
-                                    
                                     {quantidadeCarrinho}
                                 </span>
                             )}
                         </div>
 
+                        {/* Quadrado com os itens do carrinho */}
+                        {carrinhoVisivel && (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    top: "70px",         // Distância do topo para o quadrado aparecer abaixo do ícone
+                                    right: "10px",       // Alinha o quadrado ao lado direito (com alinhamento do carrinho)
+                                    width: "300px",      // Largura do quadrado
+                                    backgroundColor: "#fff",
+                                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                                    padding: "10px",
+                                    zIndex: 999,         // Garante que o quadrado fique sobre outros elementos
+                                    borderRadius: "8px", // Arredondamento das bordas
+                                    border: "1px solid black", // Borda preta fina
+                                }}
+                            >
+                                <h5>Itens no Carrinho</h5>
+                                {/* Linha mais grossa separando o título dos itens */}
+                                <hr style={{ border: "2px solid #ddd", marginBottom: "10px" }} />
+
+                                {itensCarrinho.length === 0 ? (
+                                    <p>Seu carrinho está vazio.</p>
+                                ) : (
+                                    itensCarrinho.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            style={{
+                                                marginBottom: "10px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                borderBottom: "1px solid #ddd", // Linha fina separando os itens
+                                                paddingBottom: "10px", // Um pouco de espaço entre o item e a linha
+                                                paddingTop: "10px", // Um pouco de espaço no topo do item
+                                            }}
+                                        >
+                                            {/* Imagem do produto */}
+                                            <img
+                                                src={item.imagem}
+                                                alt={item.nome}
+                                                style={{ width: "50px", height: "50px", marginRight: "10px" }}
+                                            />
+
+                                            {/* Nome do produto e a quantidade */}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: "bold", marginBottom: "5px" }}>{item.nome}</div> {/* Margem abaixo do nome */}
+                                                <div style={{ fontSize: "12px", color: "gray" }}>
+                                                    Quantidade: {item.quantidade}
+                                                </div>
+                                            </div>
+
+                                            {/* Preço do produto */}
+                                            <div style={{ fontWeight: "bold", marginLeft: "20px" }}> {/* Aumenta o espaço horizontal entre nome e preço */}
+                                                R$ {item.preco.toFixed(2)}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                                {/* Exibindo o total do carrinho */}
+                                {itensCarrinho.length > 0 && (
+                                    <div style={{ marginTop: "5px", fontWeight: "bold" }}> {/* Diminuindo o marginTop */}
+                                        <p>Total: R$ {itensCarrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0).toFixed(2)}</p>
+                                    </div>
+                                )}
+                            </div>
+
+
+
+                        )}
 
                         {/* Criando botão de criar conta ou fazer Login (Usando Drop Down ao clicar no ícone de pessoa )*/}
                         <Nav className="ms-auto">
