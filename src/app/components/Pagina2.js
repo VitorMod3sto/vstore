@@ -49,6 +49,56 @@ export default function Pagina2(props) {
     }, [search]);
     // Definindo que o useEffect será chamado sempre que o valor da pesquisa (search) mudar
 
+    // Função para carregar e atualizar a quantidade total de itens no carrinho
+    const [quantidadeCarrinho, setQuantidadeCarrinho] = useState(0); // Estado para a quantidade de itens no carrinho
+
+
+    const atualizarCarrinho = () => {
+        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const totalItens = itensCarrinho.reduce((acc, item) => acc + item.quantidade, 0);
+        setQuantidadeCarrinho(totalItens);
+    };
+
+    // Adiciona um ouvinte ao evento de mudança no localStorage
+    useEffect(() => {
+        // Atualiza a quantidade no início da carga
+        atualizarCarrinho();
+
+        // Função para tratar mudanças no carrinho no localStorage
+        const handleStorageChange = (e) => {
+            if (e.key === 'carrinho') {
+                atualizarCarrinho(); // Atualiza o contador de itens
+            }
+        };
+
+        // Escuta mudanças no localStorage
+        window.addEventListener('storage', handleStorageChange);
+
+        // Limpar a escuta quando o componente for desmontado
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []); // Esse useEffect roda uma vez ao carregar a página
+
+    // Função para adicionar um produto ao carrinho
+    const adicionarAoCarrinho = (produto) => {
+        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const produtoExistente = itensCarrinho.find(item => item.id === produto.id);
+
+        if (produtoExistente) {
+            produtoExistente.quantidade += 1; // Se o produto já estiver no carrinho, aumenta a quantidade
+        } else {
+            itensCarrinho.push({ ...produto, quantidade: 1 }); // Caso contrário, adiciona o produto com quantidade 1
+        }
+
+        // Atualiza o carrinho no localStorage
+        localStorage.setItem('carrinho', JSON.stringify(itensCarrinho));
+
+        // Atualiza o contador de itens no estado
+        atualizarCarrinho();
+    };
+
+
     return (
         // Começando componente de Página (Menu + Footer)
         <>
@@ -178,6 +228,7 @@ export default function Pagina2(props) {
                                 backgroundColor: "white",
                                 marginLeft: "10px",
                                 marginTop: "05px",
+                                position: "relative",
                             }}
                         >
                             <FaShoppingCart
@@ -186,6 +237,23 @@ export default function Pagina2(props) {
                                     fontSize: "20px",
                                 }}
                             />
+                            {quantidadeCarrinho > 0 && (
+                                <span
+                                    style={{
+                                        position: "absolute",
+                                        top: "-5px",
+                                        right: "-5px",
+                                        backgroundColor: "red",
+                                        color: "white",
+                                        borderRadius: "50%",
+                                        padding: "2px 8px",
+                                        fontSize: "14px",
+                                    }}
+                                >
+                                    
+                                    {quantidadeCarrinho}
+                                </span>
+                            )}
                         </div>
 
 
@@ -266,12 +334,14 @@ export default function Pagina2(props) {
                             <AiFillHome style={{ marginBottom: "06px" }} /> Minha Conta
                         </li>
                         <li>
-                           <Link href={`/paginas/produtos`} style={{textDecoration:'none', color:'white'}}>
-                           <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos 
-                           </Link> 
+                            <Link href={`/paginas/produtos`} style={{ textDecoration: 'none', color: 'white' }}>
+                                <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos
+                            </Link>
                         </li>
                         <li>
-                            <MdLocalGroceryStore style={{ marginBottom: "03px" }} /> Meu Carrinho
+                            <Link href={`/paginas/carrinho`} style={{ textDecoration: 'none', color: 'white' }}>
+                                <MdLocalGroceryStore style={{ marginBottom: "03px" }} /> Meu Carrinho
+                            </Link>
                         </li>
                     </ul>
                 </Modal.Body>

@@ -182,6 +182,50 @@ export default function Page({ params }) {
         }
     };
 
+
+    
+    const [carrinho, setCarrinho] = useState([]);
+    const [exibirModal, setExibirModal] = useState(false); // Alterado para exibirModal
+
+    // Carregar o carrinho do localStorage
+    useEffect(() => {
+        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        setCarrinho(itensCarrinho);
+    }, []);
+
+    const adicionarAoCarrinho = () => {
+        // Recupera o carrinho do localStorage ou inicia como um array vazio
+        const carrinhoAtual = JSON.parse(localStorage.getItem('carrinho')) || [];
+
+        // Verifica se o produto já existe no carrinho
+        const produtoExistente = carrinhoAtual.find(item => item.id === produto.id);
+
+        let novosItens;
+
+        if (produtoExistente) {
+            // Se o produto já estiver no carrinho, aumente a quantidade
+            novosItens = carrinhoAtual.map(item =>
+                item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
+            );
+        } else {
+            // Se o produto não estiver no carrinho, adicione-o com quantidade 1
+            novosItens = [...carrinhoAtual, { ...produto, quantidade: 1 }];
+        }
+
+        // Atualiza o localStorage com os novos itens
+        localStorage.setItem('carrinho', JSON.stringify(novosItens));
+
+        // Atualiza o estado do carrinho (para renderização imediata)
+        setCarrinho(novosItens);
+
+        // Exibe a modal de resumo do carrinho
+        setExibirModal(true);
+    };
+
+
+    // Fechar a modal
+    const handleCloseModal = () => setExibirModal(false); // Alterado para exibirModal
+
     return (
         <Pagina2 titulo="Detalhe do Produto">
 
@@ -225,7 +269,10 @@ export default function Page({ params }) {
 
                     <Card style={{ border: 'none' }}>
                         <Card.Body>
-                            <h1 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '28px', marginBottom: '0' }}>{produto.nome}</h1>
+                            <h1 style={{ minHeight: '70px', fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '28px', marginBottom: '0' }}>
+                                {produto.nome}
+                            </h1>
+
                             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '28px', fontWeight: 'bold', marginBottom: '0' }}>
                                 R$ {produto.preco}
                             </p>
@@ -265,7 +312,7 @@ export default function Page({ params }) {
 
                             <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
 
-                            <button  style={{
+                            <button onClick={adicionarAoCarrinho} style={{
                                 fontFamily: 'Montserrat, sans-serif',
                                 fontWeight: 'bold',
                                 backgroundColor: 'black',
@@ -620,6 +667,36 @@ export default function Page({ params }) {
                         Confirmar Pagamento
                     </Button>
 
+                </Modal.Footer>
+            </Modal>
+
+
+
+            {/* MODAL DE RESUMO DO CARRINHO */}
+            <Modal show={exibirModal} onHide={handleCloseModal}> {/* Alterado para exibirModal */}
+                <Modal.Header closeButton>
+                    <Modal.Title>Resumo do Carrinho</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h5>Itens no Carrinho:</h5>
+                    <ul style={{ listStyleType: 'none', padding: 0 }}>
+                        {carrinho.map(item => (
+                            <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', objectFit: 'contain', marginRight: '10px' }} />
+                                <span>{item.nome} - R$ {item.preco} (x{item.quantidade})</span>
+                            </li>
+                        ))}
+                    </ul>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Link href="/paginas/carrinho">
+                        <Button variant="primary" onClick={handleCloseModal}>
+                            Ver Carrinho
+                        </Button>
+                    </Link>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Fechar
+                    </Button>
                 </Modal.Footer>
             </Modal>
 
