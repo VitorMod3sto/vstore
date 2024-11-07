@@ -182,47 +182,60 @@ export default function Page({ params }) {
         }
     };
 
-
-    
+    const [clienteLogado, setClienteLogado] = useState(null);
     const [carrinho, setCarrinho] = useState([]);
-    const [exibirModal, setExibirModal] = useState(false); // Alterado para exibirModal
+    const [exibirModalResumo, setExibirModalResumo] = useState(false); // Estado para exibir o resumo do carrinho
 
-    // Carregar o carrinho do localStorage
+    // Verifica se o cliente está logado no localStorage
     useEffect(() => {
-        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-        setCarrinho(itensCarrinho);
+        const cliente = JSON.parse(localStorage.getItem('clienteLogado'));
+        if (cliente) {
+            setClienteLogado(cliente);
+            carregarCarrinho(cliente.email);  // Carregar o carrinho do cliente logado
+        }
     }, []);
 
-    const adicionarAoCarrinho = () => {
-        // Recupera o carrinho do localStorage ou inicia como um array vazio
-        const carrinhoAtual = JSON.parse(localStorage.getItem('carrinho')) || [];
-
-        // Verifica se o produto já existe no carrinho
-        const produtoExistente = carrinhoAtual.find(item => item.id === produto.id);
-
-        let novosItens;
-
-        if (produtoExistente) {
-            // Se o produto já estiver no carrinho, aumente a quantidade
-            novosItens = carrinhoAtual.map(item =>
-                item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
-            );
+    // Carregar o carrinho do cliente, se existir
+    const carregarCarrinho = (email) => {
+        const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        const carrinhoDoCliente = carrinhos.find(c => c.email === email);
+        if (carrinhoDoCliente) {
+            setCarrinho(carrinhoDoCliente.itens);
         } else {
-            // Se o produto não estiver no carrinho, adicione-o com quantidade 1
-            novosItens = [...carrinhoAtual, { ...produto, quantidade: 1 }];
+            setCarrinho([]);
         }
-
-        // Atualiza o localStorage com os novos itens
-        localStorage.setItem('carrinho', JSON.stringify(novosItens));
-
-        // Atualiza o estado do carrinho (para renderização imediata)
-        setCarrinho(novosItens);
-
-        // Exibe a modal de resumo do carrinho
-        setExibirModal(true);
     };
 
+    // Função para adicionar produto ao carrinho
+    const adicionarAoCarrinho = (produto) => {
+        if (!clienteLogado) {
+            setMensagem("Por favor, faça login para adicionar itens ao carrinho.");
+            return;
+        }
 
+        const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        let carrinhoDoCliente = carrinhos.find(c => c.email === clienteLogado.email);
+
+        if (!carrinhoDoCliente) {
+            carrinhoDoCliente = { email: clienteLogado.email, itens: [] };
+            carrinhos.push(carrinhoDoCliente);
+        }
+
+        const itemExistente = carrinhoDoCliente.itens.find(item => item.id === produto.id);
+        if (itemExistente) {
+            itemExistente.quantidade += 1;
+        } else {
+            carrinhoDoCliente.itens.push({ ...produto, quantidade: 1 });
+        }
+
+        localStorage.setItem('carrinhos', JSON.stringify(carrinhos));
+        setCarrinho(carrinhoDoCliente.itens);
+        setMensagem("Produto adicionado ao carrinho!");
+
+        // Exibe o modal com o resumo do carrinho
+        setExibirModalResumo(true);
+    };
+    const handleCloseModalResumo = () => setExibirModalResumo(false);
     // Fechar a modal
     const handleCloseModal = () => setExibirModal(false); // Alterado para exibirModal
 
@@ -312,22 +325,26 @@ export default function Page({ params }) {
 
                             <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
 
-                            <button onClick={adicionarAoCarrinho} style={{
-                                fontFamily: 'Montserrat, sans-serif',
-                                fontWeight: 'bold',
-                                backgroundColor: 'black',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                padding: '10px 20px',
-                                cursor: 'pointer',
-                                width: '100%',
-                                height: '50px',
-                                marginTop: '80px',
-                                marginBottom: '0'
-                            }}>
-                                Adicionar ao carrinho <FaShoppingCart
-                                    style={{ fontSize: '20px' }} />
+                            {mensagem && <p style={{ color: 'red' }}>{mensagem}</p>}
+
+                            <button
+                                onClick={() => adicionarAoCarrinho(produto)}
+                                style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: 'bold',
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    padding: '10px 20px',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    height: '50px',
+                                    marginTop: '80px',
+                                    marginBottom: '0'
+                                }}
+                            >
+                                Adicionar ao carrinho <FaShoppingCart style={{ fontSize: '20px' }} />
                             </button>
 
 
@@ -670,10 +687,8 @@ export default function Page({ params }) {
                 </Modal.Footer>
             </Modal>
 
-
-
-            {/* MODAL DE RESUMO DO CARRINHO */}
-            <Modal show={exibirModal} onHide={handleCloseModal}> {/* Alterado para exibirModal */}
+            {/* Modal de Resumo do Carrinho */}
+            <Modal show={exibirModalResumo} onHide={handleCloseModalResumo}>
                 <Modal.Header closeButton>
                     <Modal.Title>Resumo do Carrinho</Modal.Title>
                 </Modal.Header>
@@ -681,24 +696,23 @@ export default function Page({ params }) {
                     <h5>Itens no Carrinho:</h5>
                     <ul style={{ listStyleType: 'none', padding: 0 }}>
                         {carrinho.map(item => (
-                            <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                                <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', objectFit: 'contain', marginRight: '10px' }} />
+                            <li key={item.id} style={{ marginBottom: '10px' }}>
+                                <img src={item.imagem} alt={item.nome} style={{ width: '50px', marginRight: '10px' }} />
                                 <span>{item.nome} - R$ {item.preco} (x{item.quantidade})</span>
                             </li>
                         ))}
                     </ul>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Link href="/paginas/carrinho">
-                        <Button variant="primary" onClick={handleCloseModal}>
-                            Ver Carrinho
-                        </Button>
-                    </Link>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                    <Button variant="secondary" onClick={handleCloseModalResumo}>
                         Fechar
+                    </Button>
+                    <Button variant="primary" onClick={() => setModalPagamento(true)}>
+                        Finalizar Compra
                     </Button>
                 </Modal.Footer>
             </Modal>
+
 
         </Pagina2>
     );

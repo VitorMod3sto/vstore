@@ -1,111 +1,128 @@
-'use client';
-
+'use client'
 import { useState, useEffect } from 'react';
-import Pagina2 from "@/app/components/Pagina2";
-import { FaTrashAlt, FaMinus, FaPlus } from 'react-icons/fa'; // Ícones para aumentar/diminuir/remover
-import Link from 'next/link';
+import { Button } from 'react-bootstrap'; 
+import Pagina2 from "@/app/components/Pagina2";  // Suponho que essa seja sua estrutura
 
-export default function Page() {
+export default function CarrinhoPage() {
+    const [clienteLogado, setClienteLogado] = useState(null);
     const [carrinho, setCarrinho] = useState([]);
+    const [mensagem, setMensagem] = useState("");
 
+    // Verifica se o cliente está logado no localStorage
     useEffect(() => {
-        // Carregar os itens do carrinho do localStorage ao carregar a página
-        const itensCarrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-        setCarrinho(itensCarrinho);
+        const cliente = JSON.parse(localStorage.getItem('clienteLogado'));
+        if (cliente) {
+            setClienteLogado(cliente);
+            carregarCarrinho(cliente.email);  // Carrega o carrinho do cliente logado
+        } else {
+            setMensagem("Você precisa fazer login para ver o carrinho.");
+        }
     }, []);
 
-    // Função para aumentar a quantidade do produto no carrinho
-    const aumentarQuantidade = (id) => {
-        const novosItens = carrinho.map(item => 
-            item.id === id ? { ...item, quantidade: item.quantidade + 1 } : item
-        );
-        setCarrinho(novosItens);
-        localStorage.setItem('carrinho', JSON.stringify(novosItens));
+    // Carrega o carrinho do cliente, se existir
+    const carregarCarrinho = (email) => {
+        const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        const carrinhoDoCliente = carrinhos.find(c => c.email === email);
+        if (carrinhoDoCliente) {
+            setCarrinho(carrinhoDoCliente.itens);
+        } else {
+            setCarrinho([]);
+        }
     };
 
-    // Função para diminuir a quantidade do produto no carrinho
-const diminuirQuantidade = (id) => {
-    const novosItens = carrinho.map(item => {
-        if (item.id === id && item.quantidade > 1) {
-            return { ...item, quantidade: item.quantidade - 1 };
-        } else if (item.id === id && item.quantidade === 1) {
-            // Se a quantidade chegar a 1, removemos o produto
-            return null; // Será removido
+    // Atualiza a quantidade de um item no carrinho
+    const atualizarQuantidade = (id, quantidade) => {
+        const novoCarrinho = carrinho.map(item => {
+            if (item.id === id) {
+                return { ...item, quantidade };
+            }
+            return item;
+        });
+
+        // Atualiza no localStorage
+        const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        const carrinhoDoCliente = carrinhos.find(c => c.email === clienteLogado.email);
+        if (carrinhoDoCliente) {
+            carrinhoDoCliente.itens = novoCarrinho;
+            localStorage.setItem('carrinhos', JSON.stringify(carrinhos));
+            setCarrinho(novoCarrinho);
         }
-        return item;
-    }).filter(item => item !== null); // Filtra os itens nulos
+    };
 
-    // Atualiza o estado e o localStorage
-    setCarrinho(novosItens);
-    localStorage.setItem('carrinho', JSON.stringify(novosItens));
-};
+    // Remove um item do carrinho
+    const removerDoCarrinho = (id) => {
+        const novoCarrinho = carrinho.filter(item => item.id !== id);
 
+        // Atualiza no localStorage
+        const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        const carrinhoDoCliente = carrinhos.find(c => c.email === clienteLogado.email);
+        if (carrinhoDoCliente) {
+            carrinhoDoCliente.itens = novoCarrinho;
+            localStorage.setItem('carrinhos', JSON.stringify(carrinhos));
+            setCarrinho(novoCarrinho);
+        }
+    };
 
-    // Função para remover o produto do carrinho
-    const removerProduto = (id) => {
-        const novosItens = carrinho.filter(item => item.id !== id);
-        setCarrinho(novosItens);
-        localStorage.setItem('carrinho', JSON.stringify(novosItens));
+    // Função para calcular o total do carrinho
+    const calcularTotal = () => {
+        return carrinho.reduce((total, item) => total + item.preco * item.quantidade, 0).toFixed(2);
     };
 
     return (
-        <Pagina2 titulo="Seu Carrinho">
+        <Pagina2 titulo="Carrinho de Compras">
             <div style={{ padding: '20px' }}>
-                <h2 style={{ textAlign: 'center', fontFamily: 'Montserrat, sans-serif', fontWeight: '900' }}>
-                    Carrinho de Compras
-                </h2>
-                
+                {mensagem && <p style={{ color: 'red' }}>{mensagem}</p>}
                 {carrinho.length === 0 ? (
-                    <p style={{ textAlign: 'center', fontSize: '18px' }}>O carrinho está vazio.</p>
+                    <p>Seu carrinho está vazio.</p>
                 ) : (
-                    <div>
+                    <>
+                        <h4>Itens no Carrinho</h4>
                         <ul style={{ listStyleType: 'none', padding: 0 }}>
-                            {carrinho.map((item) => (
-                                <li key={item.id} style={{ borderBottom: '1px solid #ddd', padding: '15px 0', display: 'flex', justifyContent: 'space-between' }}>
+                            {carrinho.map(item => (
+                                <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                    <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', objectFit: 'contain', marginRight: '10px' }} />
+                                    <span style={{ flex: '1' }}>
+                                        {item.nome} - R$ {item.preco.toFixed(2)} (x{item.quantidade})
+                                    </span>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <img src={item.imagem} alt={item.nome} style={{ width: '70px', height: '70px', objectFit: 'contain', marginRight: '15px' }} />
-                                        <div>
-                                            <h5 style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{item.nome}</h5>
-                                            <p style={{ margin: '5px 0', fontSize: '16px' }}>R$ {item.preco}</p>
-                                            <p style={{ margin: '0', fontSize: '16px' }}>Quantidade: {item.quantidade}</p>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <button 
-                                            onClick={() => diminuirQuantidade(item.id)} 
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
+                                        <button
+                                            onClick={() => atualizarQuantidade(item.id, item.quantidade - 1)}
+                                            disabled={item.quantidade <= 1}
+                                            style={{ padding: '5px 10px', marginRight: '5px' }}
                                         >
-                                            <FaMinus />
+                                            - 
                                         </button>
-                                        <button 
-                                            onClick={() => aumentarQuantidade(item.id)} 
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
+                                        <button
+                                            onClick={() => atualizarQuantidade(item.id, item.quantidade + 1)}
+                                            style={{ padding: '5px 10px', marginRight: '5px' }}
                                         >
-                                            <FaPlus />
+                                            + 
                                         </button>
-                                        <button 
-                                            onClick={() => removerProduto(item.id)} 
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
+                                        <button
+                                            onClick={() => removerDoCarrinho(item.id)}
+                                            style={{ padding: '5px 10px', backgroundColor: 'red', color: 'white' }}
                                         >
-                                            <FaTrashAlt />
+                                            Remover
                                         </button>
                                     </div>
                                 </li>
                             ))}
                         </ul>
 
-                        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                            <Link href="/paginas/checkout">
-                                <button 
-                                    style={{ backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', padding: '15px 30px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}
-                                >
-                                    Finalizar Compra
-                                </button>
-                            </Link>
+                        <h4>Total: R$ {calcularTotal()}</h4>
+
+                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                            <Button variant="secondary" onClick={() => window.location.href = '/paginas/home'}>
+                                Continuar Comprando
+                            </Button>
+                            <Button variant="primary" onClick={() => alert('Ir para a finalização da compra')}>
+                                Finalizar Compra
+                            </Button>
                         </div>
-                    </div>
+                    </>
                 )}
             </div>
         </Pagina2>
     );
 }
+
