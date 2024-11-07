@@ -1,67 +1,150 @@
 'use client';
+import Pagina2 from '@/app/components/Pagina2';
+import { useEffect, useState } from 'react';
+import Link from 'next/link'; // Importando o Link
 
-import { useState } from 'react';
-import Pagina2 from "@/app/components/Pagina2";
-
-export default function Login() {
+export default function Page() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mensagem, setMensagem] = useState('');
 
+    // Salva a página anterior quando o componente é montado
+    useEffect(() => {
+        // Verifica se já existe uma URL de origem no localStorage
+        if (!localStorage.getItem('previousPage')) {
+            // Se não houver, salva a página atual
+            localStorage.setItem('previousPage', window.location.href);
+        }
+    }, []);
+
     // Função de login
     const loginCliente = () => {
         const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        const cliente = clientes.find(cliente => cliente.email === email && cliente.senha === senha);
+        const cliente = clientes.find(cliente => cliente.email === email);
 
         if (!cliente) {
-            setMensagem('E-mail ou senha inválidos!');
+            setMensagem('E-mail não encontrado!');
+            return;
+        }
+
+        if (cliente.senha !== senha) {
+            setMensagem('Senha incorreta!');
             return;
         }
 
         // Salvando o cliente logado no localStorage
         localStorage.setItem('clienteLogado', JSON.stringify(cliente));
         setMensagem('Login bem-sucedido!');
-        // Redirecionando para a página inicial ou carrinho (opcional)
-        window.location.href = '/paginas/home'; // Pode alterar para a página que desejar
+
+        // Redirecionar para a página anterior ou para a página inicial
+        const previousPage = localStorage.getItem('previousPage') || '/paginas/home'; // Padrão para /paginas/home
+        window.location.href = previousPage;
     };
 
     return (
         <Pagina2 titulo="Login">
-            <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
-                <h2>Login</h2>
-                <div style={{ marginBottom: '10px' }}>
+            <div style={{
+                padding: '40px',
+                width: '400px',
+                margin: '50px auto', // Margem superior e inferior
+                backgroundColor: 'black',
+                borderRadius: '8px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                color: 'white', // Para garantir que o texto seja visível
+                textAlign: 'center'
+            }}>
+                {/* Título */}
+                <h2 style={{
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: '700',
+                    fontSize: '24px',
+                    marginBottom: '30px',
+                    color: 'white'
+                }}>
+                   BEM VINDO DE VOLTA
+                </h2>
+
+                <div style={{ marginBottom: '20px' }}>
+                    {/* Campo de Email */}
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="E-mail"
-                        style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            marginBottom: '15px',
+                            borderRadius: '5px',
+                            border: '2px solid #333',
+                            boxSizing: 'border-box', // Para garantir que a largura fique certa
+                            fontSize: '16px'
+                        }}
                     />
+                    {/* Campo de Senha */}
                     <input
                         type="password"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                         placeholder="Senha"
-                        style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            marginBottom: '20px',
+                            borderRadius: '5px',
+                            border: '2px solid #333',
+                            boxSizing: 'border-box',
+                            fontSize: '16px'
+                        }}
                     />
                 </div>
 
+                {/* Mensagem de erro ou sucesso */}
+                <div style={{ minHeight: '30px' }}>
+                    {mensagem && (
+                        <p style={{
+                            textAlign: 'center',
+                            color: 'red',
+                            marginTop: '15px',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }}>
+                            {mensagem}
+                        </p>
+                    )}
+                </div>
+
+                {/* Botão de Login */}
                 <button
                     onClick={loginCliente}
                     style={{
                         width: '100%',
-                        padding: '10px',
+                        padding: '12px',
                         backgroundColor: '#007bff',
                         color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        transition: 'background-color 0.3s ease'
                     }}
                 >
-                    Entrar
+                    ENTRAR
                 </button>
 
-                {mensagem && <p style={{ textAlign: 'center', color: 'red', marginTop: '10px' }}>{mensagem}</p>}
+                {/* Botão de Cadastro */}
+                <div style={{ marginTop: '20px' }}>
+                    <p style={{ fontSize: '14px', color: 'white' }}>
+                        Não tem conta? 
+                        <Link href="/paginas/cadastros" style={{
+                            color: '#28a745',
+                            textDecoration: 'none',
+                            fontWeight: 'bold'
+                        }}> Cadastre-se
+                        </Link>
+                    </p>
+                </div>
             </div>
         </Pagina2>
     );

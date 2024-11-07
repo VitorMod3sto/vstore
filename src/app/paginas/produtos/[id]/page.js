@@ -113,89 +113,20 @@ export default function Page({ params }) {
         // Chama a função de fechar a Modal
     };
 
-    const [ModalPagamento, setModalPagamento] = useState(false);
-    // Estado pra controlar a Modal (iniciando com ela fechada = false)
-
-    const [dadosCartao, setdadosCartao] = useState({ number: '', expiry: '', cvv: '', namecard: '', brand: '' });
-    // Estado pra armazenar os dados do cartão (número, data de vencimento, cvv, nome do cartao e bandeira)
-
-    const [mensagem, setMensagem] = useState('');
-    // Estado para armazenar a mensagem de compra autorizada ou negado
-
-    const [mensagemTipo, setmensagemTipo] = useState('');
-    // Estado para armazenar o tipo de mensagem (se foi aprovado ou negado)
-
-    const [bandeira, setBandeira] = useState('');
-    // Estado para armazenar a bandeira do cartão
-
-    const handlePaymentModal = () => {
-        setModalPagamento(true);
-    };
-    // Atualizando estado da Modal de pagamento para true (fazendo ela aparecer)
-
-    const handlePaymentClose = () => {
-        setModalPagamento(false);
-        setdadosCartao({ number: '', expiry: '', cvv: '', name: '', brand: 'Selecione a bandeira', });
-        setBandeira('');
-        setMensagem('');
-        setmensagemTipo('');
-    };
-    // Atualizando estado da Modal pra false (fechando) e resetando os campos digitados
-
-    const handleCardDetailChange = (e) => {
-        const { name, value } = e.target;
-        // Extraindo o campo nome de dadosCartao 
-        setdadosCartao(prev => ({ ...prev, [name]: value }));
-    };
-    //  Atualizando os dados do cartão sempre que alterar algum valor do campo nome
-    // Na qual atualiza o campo alterado e copia os demais inalterados (com base nos valores salvos pela última vez nos dadosCartao)
-
-    const validateCard = () => {
-        const { number, brand } = dadosCartao;
-        // Extraindo o campo numero e bandeira de dadosCartao 
-        const brandMapping = {
-            visa: /^4/,
-            master: /^[25]/
-        };
-        // Definindo um objeto que guarda o numero inicial do cartão, e define que Master = 5 ou 2 e Visa = 4
-        // Usado logo abaixo pra testar se o numero do cartao corresponde a sua devida bandeira
-
-        const isValid = brandMapping[brand] ? brandMapping[brand].test(number) : false;
-        // Armazenando se o teste da bandeira selecionada corresponde a Master ou Visa (true ou false) e se sim, testa o numero do cartao
-        // com a função de sua bandeira correspondente
-
-        // Se a bandeira corresponder o isValid = true, senão isValid = false
-        if (!isValid) {
-            // Se for false = Dados incorretos (não passou na função de teste como true)
-            setMensagem('Dados incorretos, verifique e tente novamente');
-            setmensagemTipo('error');
-            // Exibe a mensagem de erro (criada separado de sucess para estilizar mais a frente no código)
-        } else {
-            // Se for true = Dados corretos (passou na validação)
-            setMensagem('Compra efetuada com sucesso, verifique seu email');
-            setmensagemTipo('success');
-            // Exibe a mensagem de sucesso
-            setTimeout(() => {
-                handlePaymentClose();
-            }, 3000);
-            // Definindo que após sucesso, exibe a mensagem e fecha a modal (puxando a função handlePaymentClose) após 3s
-        }
-    };
-
     const [clienteLogado, setClienteLogado] = useState(null);
     const [carrinho, setCarrinho] = useState([]);
     const [exibirModalResumo, setExibirModalResumo] = useState(false); // Estado para exibir o resumo do carrinho
+    const [showModalLogin, setShowModalLogin] = useState(false);
 
-    // Verifica se o cliente está logado no localStorage
     useEffect(() => {
         const cliente = JSON.parse(localStorage.getItem('clienteLogado'));
         if (cliente) {
+            console.log('Cliente logado:', cliente); // Adicionei um console.log para debug
             setClienteLogado(cliente);
-            carregarCarrinho(cliente.email);  // Carregar o carrinho do cliente logado
+            carregarCarrinho(cliente.email);
         }
     }, []);
 
-    // Carregar o carrinho do cliente, se existir
     const carregarCarrinho = (email) => {
         const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
         const carrinhoDoCliente = carrinhos.find(c => c.email === email);
@@ -206,38 +137,77 @@ export default function Page({ params }) {
         }
     };
 
-    // Função para adicionar produto ao carrinho
-    const adicionarAoCarrinho = (produto) => {
-        if (!clienteLogado) {
-            setMensagem("Por favor, faça login para adicionar itens ao carrinho.");
-            return;
-        }
+    // Função para abrir a modal de login
+    const handleOpenModalLogin = () => setShowModalLogin(true);
+    const handleCloseModalLogin = () => setShowModalLogin(false);
 
+    const adicionarAoCarrinho = (produto) => {
+        // Recarregar o cliente logado sempre que a função for chamada
+        const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
+    
+        if (!clienteLogado) {
+            console.log('Cliente não logado, mostrando a modal de login');
+            handleOpenModalLogin();  // Exibe a modal de login
+            return;  // Sai da função caso não esteja logado
+        }
+    
+        console.log('Cliente logado, adicionando ao carrinho');
+    
+        // Lógica para adicionar o produto ao carrinho se o cliente estiver logado
         const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
         let carrinhoDoCliente = carrinhos.find(c => c.email === clienteLogado.email);
-
+    
         if (!carrinhoDoCliente) {
+            // Se não houver carrinho, cria um novo
             carrinhoDoCliente = { email: clienteLogado.email, itens: [] };
             carrinhos.push(carrinhoDoCliente);
         }
-
+    
+        // Verifica se o produto já está no carrinho
         const itemExistente = carrinhoDoCliente.itens.find(item => item.id === produto.id);
         if (itemExistente) {
+            // Caso exista, apenas incrementa a quantidade
             itemExistente.quantidade += 1;
         } else {
+            // Caso não exista, adiciona o produto ao carrinho
             carrinhoDoCliente.itens.push({ ...produto, quantidade: 1 });
         }
-
+    
+        // Atualiza o localStorage com o carrinho
         localStorage.setItem('carrinhos', JSON.stringify(carrinhos));
+    
+        // Atualiza o estado do carrinho
         setCarrinho(carrinhoDoCliente.itens);
-        setMensagem("Produto adicionado ao carrinho!");
-
-        // Exibe o modal com o resumo do carrinho
+    
+        // Exibe o modal de resumo
         setExibirModalResumo(true);
     };
+
     const handleCloseModalResumo = () => setExibirModalResumo(false);
-    // Fechar a modal
-    const handleCloseModal = () => setExibirModal(false); // Alterado para exibirModal
+
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [mensagem, setMensagem] = useState('');
+    const [showLoginForm, setShowLoginForm] = useState(false);  // Estado para alternar entre login e opções de login
+
+    // Função de login
+    const loginCliente = () => {
+        const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+        const cliente = clientes.find(cliente => cliente.email === email && cliente.senha === senha);
+
+        if (!cliente) {
+            setMensagem('E-mail ou senha inválidos!');
+            return;
+        }
+
+        // Salvando o cliente logado no localStorage
+        localStorage.setItem('clienteLogado', JSON.stringify(cliente));
+        setMensagem('Login bem-sucedido!');
+        
+        // Fechar a modal
+        handleCloseModalLogin();
+    };
+
 
     return (
         <Pagina2 titulo="Detalhe do Produto">
@@ -325,8 +295,6 @@ export default function Page({ params }) {
 
                             <div style={{ borderBottom: '1px solid #ccc', margin: '10px 0' }} />
 
-                            {mensagem && <p style={{ color: 'red' }}>{mensagem}</p>}
-
                             <button
                                 onClick={() => adicionarAoCarrinho(produto)}
                                 style={{
@@ -349,7 +317,8 @@ export default function Page({ params }) {
 
 
 
-                            <button onClick={handlePaymentModal} style={{
+
+                            <button style={{
                                 fontFamily: 'Montserrat, sans-serif',
                                 fontWeight: 'bold',
                                 backgroundColor: 'black',
@@ -553,140 +522,6 @@ export default function Page({ params }) {
                 </Modal.Footer>
             </Modal>
 
-            {/* MODAL DE PAGAMENTO */}
-            <Modal show={ModalPagamento} onHide={handlePaymentClose} dialogClassName="custom-modal">
-
-                <Modal.Header style={{ color: 'white', backgroundColor: 'black' }} closeButton>
-                    <Modal.Title>CONFIRMAR COMPRA <BiSolidPurchaseTagAlt /></Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body style={{ backgroundColor: 'black', color: 'white' }}>
-                    <h5>Escolha a forma de pagamento:</h5>
-
-                    <div style={{ marginBottom: '20px' }}>
-                        <Dropdown>
-                            <Dropdown.Toggle
-                                variant="secondary"
-                                id="dropdown-basic"
-                                style={{
-                                    width: '100%',
-                                    borderRadius: '5px',
-                                    backgroundColor: bandeira === 'Visa' ? 'darkblue' :
-                                        bandeira === 'MasterCard' ? 'orange' :
-                                            bandeira === 'Elo' ? 'lightgrey' : 'white',
-                                    color: bandeira ? 'white' : 'black'
-
-                                }}
-                            >
-                                {bandeira ? bandeira : "Selecione a bandeira"}
-                                {/* Verificando qual a bandeira do cartão e definindo cor de fundo para cada uma, se nenhuma for 
-                                selecionada, fica preto e branco. Se nenhuma bandeira for selecionada, exibe a mensagem acima*/}
-                            </Dropdown.Toggle>
-
-                            <Dropdown.Menu>
-
-                                <Dropdown.Item
-                                    onClick={() => {
-                                        setBandeira('Visa');
-                                        setdadosCartao(prev => ({ ...prev, brand: 'visa' }));
-                                    }}
-                                    style={{ backgroundColor: 'white', color: 'black' }}
-                                >
-                                    <RiVisaFill style={{ marginRight: '5px', color: 'black' }} /> Visa
-                                </Dropdown.Item>
-
-                                <Dropdown.Item
-                                    onClick={() => {
-                                        setBandeira('MasterCard');
-                                        setdadosCartao(prev => ({ ...prev, brand: 'master' }));
-                                    }}
-                                    style={{ backgroundColor: 'white', color: 'black' }}
-                                >
-                                    <RiMastercardFill style={{ marginRight: '5px' }} /> MasterCard
-                                </Dropdown.Item>
-
-                                <Dropdown.Item
-                                    onClick={() => {
-                                        setBandeira('Elo');
-                                        setdadosCartao(prev => ({ ...prev, brand: 'elo' }));
-                                    }}
-                                    style={{ backgroundColor: 'white', color: 'black' }}
-                                >
-                                    <FaEdgeLegacy style={{ marginRight: '5px', color: 'black' }} /> Elo
-                                </Dropdown.Item>
-
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </div>
-
-                    <div style={{ marginTop: '20px' }}>
-                        <input
-                            type="text"
-                            name="number"
-                            placeholder="Número do Cartão"
-                            value={dadosCartao.number}
-                            onChange={handleCardDetailChange}
-                            style={{ marginBottom: '10px', width: '100%', borderRadius: '5px', padding: '10px' }}
-                        />
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <input
-                                type="text"
-                                name="expiry"
-                                placeholder="Data de Vencimento (MM/AA)"
-                                value={dadosCartao.expiry}
-                                onChange={handleCardDetailChange}
-                                style={{ marginBottom: '10px', width: '48%', borderRadius: '5px', padding: '10px' }}
-                            />
-                            <input
-                                type="text"
-                                name="cvv"
-                                placeholder="CVV"
-                                value={dadosCartao.cvv}
-                                onChange={handleCardDetailChange}
-                                style={{ marginBottom: '10px', width: '48%', borderRadius: '5px', padding: '10px' }}
-                            />
-                        </div>
-                        <input
-                            type="text"
-                            name="namecard"
-                            placeholder="Nome no Cartão"
-                            value={dadosCartao.namecard}
-                            onChange={handleCardDetailChange}
-                            style={{ marginBottom: '10px', width: '100%', borderRadius: '5px', padding: '10px' }}
-                        />
-                    </div>
-                    {mensagem && (
-                        <div style={{
-                            marginTop: '20px',
-                            color: mensagemTipo === 'success' ? 'green' : 'red',
-                            display: 'flex',
-                            alignItems: 'center',
-                        }}>
-                            {mensagemTipo === 'success' ? (
-                                <FaCheckCircle style={{ marginRight: '10px', fontSize: '20px' }} />
-                            ) : (
-                                <FaExclamationCircle style={{ marginRight: '10px', fontSize: '20px' }} />
-                            )}
-                            <span>{mensagem}</span>
-                        </div>
-                    )}
-                    {/* Verifica se há alguma mensagem a ser exibida, se for true, verifica qual tipo de mensagem 
-                    e a exibe em uma div (cada mensagem tem um estilo) */}
-                </Modal.Body>
-
-                <Modal.Footer style={{ backgroundColor: 'black' }}>
-
-                    <Button style={{ backgroundColor: 'black', color: 'white', border: '1px solid white' }} onClick={handlePaymentClose}>
-                        Fechar
-                    </Button>
-
-                    <Button style={{ border: '1px solid white', backgroundColor: '#1e7e34' }} onClick={validateCard}>
-                        Confirmar Pagamento
-                    </Button>
-
-                </Modal.Footer>
-            </Modal>
-
             {/* Modal de Resumo do Carrinho */}
             <Modal show={exibirModalResumo} onHide={handleCloseModalResumo}>
                 <Modal.Header closeButton>
@@ -713,6 +548,93 @@ export default function Page({ params }) {
                 </Modal.Footer>
             </Modal>
 
+           
+            <Modal show={showModalLogin} onHide={handleCloseModalLogin}>
+            <Modal.Header closeButton>
+                <Modal.Title>Por favor, faça login ou cadastre-se</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {/* Se o estado showLoginForm for true, mostrar o formulário de login */}
+                {showLoginForm ? (
+                    <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
+                        <div style={{ marginBottom: '10px' }}>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="E-mail"
+                                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
+                            />
+                            <input
+                                type="password"
+                                value={senha}
+                                onChange={(e) => setSenha(e.target.value)}
+                                placeholder="Senha"
+                                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
+                            />
+                        </div>
+
+                        <button
+                            onClick={loginCliente}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Entrar
+                        </button>
+
+                        {mensagem && <p style={{ textAlign: 'center', color: 'red', marginTop: '10px' }}>{mensagem}</p>}
+                    </div>
+                ) : (
+                    // Caso contrário, mostrar as opções de login e cadastro
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <button
+                            onClick={() => setShowLoginForm(true)}  // Alterando para exibir o formulário de login
+                            style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '10px 20px',
+                                cursor: 'pointer',
+                                width: '48%'
+                            }}
+                        >
+                            Login
+                        </button>
+                        <button
+                            style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '10px 20px',
+                                cursor: 'pointer',
+                                width: '48%'
+                            }}
+                            onClick={() => window.location.href = '/paginas/cadastros'}  // Redirecionando para a página de cadastro
+                        >
+                            Cadastrar-se
+                        </button>
+                    </div>
+                )}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseModalLogin}>
+                    Fechar
+                </Button>
+            </Modal.Footer>
+        </Modal>
 
         </Pagina2>
     );
