@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Row, Col, Card, Dropdown, Container } from 'react-bootstrap';
 import { BiLogoVuejs } from "react-icons/bi";
 
-export default function Page() {
+export default function Page({ params }) {
     const [loading, setLoading] = useState(true);
 
     const [produtos, setProdutos] = useState([]);
@@ -27,37 +27,42 @@ export default function Page() {
     const [ordemPreco, setOrdemPreco] = useState(null);
     // Estado para armazenar a ordem de exibição dos produtos por preço
 
-
     useEffect(() => {
         // useEffect para executar as linhas abaixo ao montar o componente (sempre que atualizar da url também)
         const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
         //Armazenando todos os produtos salvos
+        
+        const marcaNome = decodeURIComponent(params.nome.toLowerCase()); // Converte o nome da marca para minúsculo
+        // Armazenando o nome da marca através da url (em minúsculo)
+        
+        const produtosMarca = produtosLocal.filter(produto => produto.marca.toLowerCase() === marcaNome);
+        // Armazenando os produtos que o atributo produto.marca (convertido para minúsculo) = mesmo nome do params (em minúsculo)
 
-        const marcasLocal = [...new Set(produtosLocal.map(produto => produto.marca))];
+        setProdutos(produtosMarca);
+        // Atualizando os produtos com os produtos da marca atual
+
+        const marcasLocal = JSON.parse(localStorage.getItem('marcas')) || [];
         // Armazenando todas as marcas salvas
 
-        const tamanhosLocal = [...new Set(produtosLocal.map(produto => produto.tamanho))];
-        // Armazenando os tamanhos dos produtos 
-
-        const tamanhosUnico = [...tamanhosLocal, 'Tamanho único'.toUpperCase()];
-        // Armazenando o tamanho dos produtos de tamanho = Tamanho único
-
-        setProdutos(produtosLocal);
+        const tamanhosLocal = [...new Set(produtosMarca.map(produto => produto.tamanho))];
+        // Armazenando apenas os tamanhos de produtos da marca atual
         setMarcas(marcasLocal);
+        // Atualizando as marcas com as marcas salvas no LocalStorage
         setTamanhos(tamanhosLocal);
-        setTamanhos(tamanhosUnico);
-        // Atualizando os produtos, marcas, tamanhos
+        // Atualizando os tamanhos com os tamanhos dos produtos da marca
         setLoading(false);
     }, []);
 
     const filtrarProdutos = () => {
         // Criando função pra filtrar os produtos
-        let produtosFiltrados = JSON.parse(localStorage.getItem('produtos')) || [];
-        // Armazenando os produtos
+        const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
+        //Armazenando todos os produtos salvos
 
-        if (marcaSelecionada) {
-            produtosFiltrados = produtosFiltrados.filter(produto => produto.marca === marcaSelecionada);
-        }
+        const marcaNome = decodeURIComponent(params.nome.toLowerCase());
+        // Armazenando o nome da marca em minúsculo
+
+        let produtosFiltrados = produtosLocal.filter(produto => produto.marca.toLowerCase() === marcaNome);
+        // Filtrando os produtos com a marca no mesmo formato (minúsculo)
 
         if (tamanhoSelecionado) {
             produtosFiltrados = produtosFiltrados.filter(produto => produto.tamanho === tamanhoSelecionado);
@@ -66,15 +71,14 @@ export default function Page() {
         if (ordemPreco) {
             produtosFiltrados.sort((a, b) => ordemPreco === 'maior' ? b.preco - a.preco : a.preco - b.preco);
         }
-        // Verfica acima se foi alterado o valor de marcaSelecionada, tamanho e ordemPreço
+
         setProdutos(produtosFiltrados);
         // Atualiza os produtos com apenas os filtrados
     };
 
     useEffect(() => {
-        // Definindo o useEffect pra função de filtro pra ela ser chamada sempre que os filtros mudarem
         filtrarProdutos();
-    }, [marcaSelecionada, tamanhoSelecionado, ordemPreco]);
+    }, [tamanhoSelecionado, ordemPreco]);
 
     if (loading) {
         return (
@@ -88,7 +92,7 @@ export default function Page() {
                 <BiLogoVuejs style={{
                     fontSize: '50px',
                     color: 'black',
-                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
+                    animation: 'pulse 1.5s ease-in-out infinite',
                     transformOrigin: 'center center',
                     animation: 'pulse 1.5s ease-in-out infinite',
                 }} />
@@ -96,13 +100,13 @@ export default function Page() {
                     {`
                     @keyframes pulse {
                         0% {
-                            transform: scale(1); /* Tamanho original */
+                            transform: scale(1); 
                         }
                         50% {
-                            transform: scale(1.2); /* Aumenta o tamanho */
+                            transform: scale(1.2);
                         }
                         100% {
-                            transform: scale(1); /* Retorna ao tamanho original */
+                            transform: scale(1);
                         }
                     }
                     `}
@@ -111,17 +115,16 @@ export default function Page() {
         );
     }
 
-
     return (
-        <Pagina2 titulo='Produtos'>
+        <Pagina2 titulo='Marca'>
             <Container fluid className="px-0">
 
-                {/* TÍTULO DA PÁGINA COM A CATEGORIA */}
+                {/* TÍTULO DA PÁGINA COM A MARCA */}
                 <h2 style={{
                     fontFamily: 'Montserrat, sans-serif', fontWeight: '900',
                     textAlign: 'center', fontSize: '35px', marginTop: '05px', marginBottom: '20px'
                 }}>
-                    Todos os Produtos
+                    {decodeURIComponent(params.nome)}
                 </h2>
 
                 {/* FILTROS  */}
@@ -136,31 +139,6 @@ export default function Page() {
                             backgroundColor: 'black',
                             color: 'white',
                             width: '150px',
-                        }} id="dropdown-basic">
-                            {marcaSelecionada ? marcaSelecionada : 'Marca'}
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setMarcaSelecionada(null); setOrdemPreco(null); }}>Todas</Dropdown.Item>
-                            {marcas.map(marca => (
-                                <Dropdown.Item key={marca} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setMarcaSelecionada(marca); setOrdemPreco(null); }}>
-                                    {marca}
-                                </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-
-                    </Dropdown>
-
-                    <Dropdown style={{ marginRight: '10px' }}>
-
-                        <Dropdown.Toggle style={{
-                            fontFamily: 'Montserrat, sans-serif',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            border: 'none',
-                            backgroundColor: 'black',
-                            color: 'white',
-                            width: '160px',
                         }} id="dropdown-tamanho">
                             {tamanhoSelecionado ? tamanhoSelecionado : 'Tamanho'}
                         </Dropdown.Toggle>
@@ -177,7 +155,6 @@ export default function Page() {
                     </Dropdown>
 
                     <Dropdown>
-
                         <Dropdown.Toggle style={{
                             fontFamily: 'Montserrat, sans-serif',
                             fontWeight: 'bold',
@@ -191,7 +168,7 @@ export default function Page() {
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); }}>Todos</Dropdown.Item>
+                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); setOrdemPreco(null); }}>Todos</Dropdown.Item>
                             <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('menor')}>Menor Preço</Dropdown.Item>
                             <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('maior')}>Maior Preço</Dropdown.Item>
                         </Dropdown.Menu>
@@ -203,9 +180,10 @@ export default function Page() {
                 <Row>
                     {produtos.map(produto => (
                         <Col md={2} key={produto.id} className="mb-4">
-                            <Link href={`/paginas/produtos/${produto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
 
+                            <Link href={`/paginas/produtos/${produto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <Card style={{ border: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}>
+
                                     <Card.Img
                                         variant="top"
                                         src={produto.imagem}
@@ -216,19 +194,18 @@ export default function Page() {
                                         <Card.Title style={{ margin: '0', fontFamily: 'Montserrat, sans-serif', fontWeight: '900', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
                                             {produto.nome.length > 23 ? `${produto.nome.slice(0, 23)}...` : produto.nome}
                                         </Card.Title>
-
+                                        
                                         <Card.Text style={{ margin: '0', fontFamily: 'Montserrat, sans-serif', marginTop: 'auto' }}>
                                             R$ {produto.preco.toFixed(2)}
                                         </Card.Text>
-
                                     </Card.Body>
-                                </Card>
 
+                                </Card>
                             </Link>
                         </Col>
                     ))}
                 </Row>
-                
+
             </Container>
         </Pagina2>
     );

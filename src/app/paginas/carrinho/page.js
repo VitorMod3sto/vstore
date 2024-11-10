@@ -1,24 +1,35 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import Pagina2 from "@/app/components/Pagina2";
-import { FaTrashAlt, FaMinus, FaPlus } from 'react-icons/fa'; // Ícones para aumentar/diminuir/remover
+import { FaTrashAlt, FaShippingFast } from 'react-icons/fa'; // Ícones para aumentar/diminuir/remover
 import Link from 'next/link';
+import { FaCcMastercard, FaCcVisa } from 'react-icons/fa'; // Mastercard e Visa
+import { FaPix } from 'react-icons/fa6'; // Ícone de Pix
+import { BiLogoVuejs } from 'react-icons/bi';
 
 export default function CarrinhoPage() {
     const [clienteLogado, setClienteLogado] = useState(null);
     const [carrinho, setCarrinho] = useState([]);
     const [mensagem, setMensagem] = useState("");
+    const [showLoginModal, setShowLoginModal] = useState(false); // Controla a exibição da modal de login ou cadastro
+    const [showLoginForm, setShowLoginForm] = useState(false); // Controla a exibição do formulário de login
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [loginMensagem, setLoginMensagem] = useState('');
+    const [loading, setLoading] = useState(true); // Estado de carregamento
 
     // Verifica se o cliente está logado no localStorage
     useEffect(() => {
         const cliente = JSON.parse(localStorage.getItem('clienteLogado'));
         if (cliente) {
-            setClienteLogado(cliente);
+            setClienteLogado(cliente);  // Carrega os dados do cliente se estiver logado
             carregarCarrinho(cliente.email);  // Carrega o carrinho do cliente logado
         } else {
             setMensagem("Você precisa estar logado para acessar o carrinho.");
+            setShowLoginModal(true); // Exibe a modal de login se não estiver logado
         }
+        setLoading(false); // Atualiza o estado de carregamento para falso após a verificação
     }, []);
 
     // Carrega o carrinho do cliente, se existir
@@ -70,137 +81,475 @@ export default function CarrinhoPage() {
         return carrinho.reduce((total, item) => total + item.preco * item.quantidade, 0).toFixed(2);
     };
 
+    // Função de login
+    const loginCliente = () => {
+        const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+        const cliente = clientes.find(cliente => cliente.email === email);
+
+        // Verifica se o cliente foi encontrado
+        if (!cliente) {
+            setLoginMensagem('E-mail não encontrado!');
+            return;
+        }
+
+        // Verifica se a senha está correta
+        if (cliente.senha !== senha) {
+            setLoginMensagem('Senha incorreta!');
+            return;
+        }
+
+        // Se o login for bem-sucedido
+        localStorage.setItem('clienteLogado', JSON.stringify(cliente));
+        setLoginMensagem('Login bem-sucedido!');
+
+        // Atualiza o estado
+        setClienteLogado(cliente);
+        setShowLoginForm(false); // Fecha o formulário de login
+        setShowLoginModal(false); // Fecha a modal de mensagem
+        carregarCarrinho(cliente.email); // Carrega o carrinho do cliente logado
+    };
+
+    // Função para abrir a modal de login
+    const abrirModalLogin = () => {
+        setShowLoginModal(false); // Fecha a modal de mensagem
+        setShowLoginForm(true); // Abre o formulário de login
+    };
+
+    // Se estiver carregando, não renderiza nada ainda
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '100vh',
+                backgroundColor: 'white',
+            }}>
+                <div style={{
+                    fontSize: '50px',
+                    color: 'black',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                    transformOrigin: 'center center',
+                }}>...</div>
+            </div>
+        );
+    }
+
     return (
         <Pagina2 titulo="Carrinho de Compras">
-            <div style={{ padding: '10px' }}>
-                {mensagem && (
-                    <div 
-                        style={{
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh',
+                paddingBottom: '50px',
+            }}>
+                <div style={{
+                    display: 'flex',
+                    flex: 1,
+                    padding: '20px',
+                    justifyContent: 'space-between',
+                    minHeight: '700px',
+                }}>
+                    {/* Modal de Login ou Cadastro */}
+                    {!clienteLogado && !showLoginForm && (
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                            zIndex: 1000,
+                            minHeight: '100vh',
+                        }}>
+                            <div style={{
+                                textAlign: 'center',
+                                backgroundColor: 'white',
+                                padding: '30px',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                width: '80%',
+                                maxWidth: '600px',
+                            }}>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
+                                    {mensagem}
+                                </p>
+                                <div>
+                                    <button
+                                        style={{
+                                            backgroundColor: '#007bff',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            padding: '12px 20px',
+                                            cursor: 'pointer',
+                                            fontSize: '16px',
+                                            fontWeight: 'bold',
+                                            marginRight: '15px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                        onClick={abrirModalLogin} // Abre o formulário de login
+                                    >
+                                        Fazer Login
+                                    </button>
+                                    <Link href="/paginas/cadastros">
+                                        <button
+                                            style={{
+                                                backgroundColor: '#28a745',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                padding: '12px 20px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                                fontWeight: 'bold',
+                                                marginLeft: '15px',
+                                                transition: 'background-color 0.3s',
+                                            }}
+                                        >
+                                            Cadastre-se
+                                        </button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal de Login */}
+                    {showLoginForm && (
+                        <div style={{
+                            padding: '40px',
+                            width: '400px',
+                            margin: '50px auto', // Margem superior e inferior
                             backgroundColor: 'black',
-                            color: 'white',
-                            border: '1px solid #f5c6cb',
                             borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                            color: 'white', // Para garantir que o texto seja visível
+                            textAlign: 'center'
+                        }}>
+                            {/* Título */}
+                            <h2 style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: '700',
+                                fontSize: '24px',
+                                marginBottom: '30px',
+                                color: 'white'
+                            }}>
+                                BEM VINDO DE VOLTA <BiLogoVuejs style={{ fontSize: '45px' }} />
+                            </h2>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                {/* Campo de Email */}
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="E-mail"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        marginBottom: '15px',
+                                        borderRadius: '5px',
+                                        border: '2px solid #333',
+                                        boxSizing: 'border-box', // Para garantir que a largura fique certa
+                                        fontSize: '16px'
+                                    }}
+                                />
+                                {/* Campo de Senha */}
+                                <input
+                                    type="password"
+                                    value={senha}
+                                    onChange={(e) => setSenha(e.target.value)}
+                                    placeholder="Senha"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        marginBottom: '20px',
+                                        borderRadius: '5px',
+                                        border: '2px solid #333',
+                                        boxSizing: 'border-box',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Mensagem de erro ou sucesso */}
+                            <div style={{ minHeight: '30px' }}>
+                                {loginMensagem && ( // Verifique o valor da variável de estado loginMensagem
+                                    <p style={{
+                                        textAlign: 'center',
+                                        color: 'red',
+                                        marginTop: '15px',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {loginMensagem}  {/* Exibe a mensagem */}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Botão de Login */}
+                            <button
+                                onClick={loginCliente}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    transition: 'background-color 0.3s ease'
+                                }}
+                            >
+                                ENTRAR
+                            </button>
+
+                            {/* Botão de Cadastro */}
+                            <div style={{ marginTop: '20px' }}>
+                                <p style={{ fontSize: '14px', color: 'white' }}>
+                                    Não tem conta?
+                                    <Link href="/paginas/cadastros" style={{
+                                        color: '#28a745',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold'
+                                    }}> Cadastre-se
+                                    </Link>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Lado esquerdo - Itens do Carrinho */}
+                    {clienteLogado && (
+                        <div style={{ width: '60%', marginLeft: '5%', minHeight: '700px' }}>
+                            <h1 style={{
+                                fontFamily: 'Poppins, sans-serif',
+                                fontWeight: '900',
+                                fontSize: '30px',
+                                marginBottom: '35px',
+                                marginLeft: '05px'
+                            }}>
+                                CARRINHO
+                            </h1>
+
+                            {/* Mensagem de carrinho vazio */}
+                            {carrinho.length === 0 ? (
+                                <>
+                                    <h1 style={{
+                                        fontFamily: 'Poppins, sans-serif',
+                                        fontWeight: '900',
+                                        fontSize: '28px',
+                                        marginBottom: '5px',
+                                        marginLeft: '5px'
+                                    }}>
+                                        SEU CARRINHO ESTÁ VAZIO!
+                                    </h1>
+                                    <p style={{ fontSize: '16px', color: 'BLACK', marginLeft: '5px' }}>
+                                        Mas veja, ainda dá tempo de corrigir isso.
+                                    </p>
+                                </>
+                            ) : (
+                                <ul style={{ listStyleType: 'none', padding: 0 }}>
+                                    {carrinho.map(item => (
+                                        <li key={item.id}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                border: '1px solid black',
+                                                padding: '20px',
+                                                marginBottom: '20px',
+                                                borderRadius: '8px',
+                                                minHeight: '120px',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', width: '70%' }}>
+                                                <img src={item.imagem} alt={item.nome} style={{
+                                                    width: '80px', height: '80px', objectFit: 'contain', marginRight: '15px'
+                                                }} />
+                                                <div>
+                                                    <h5 style={{
+                                                        margin: '0', fontSize: '18px', fontWeight: 'bold', marginBottom: '5px'
+                                                    }}>{item.nome}</h5>
+
+                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                        <select
+                                                            value={item.quantidade}
+                                                            onChange={(e) => atualizarQuantidade(item.id, parseInt(e.target.value))}
+                                                            style={{
+                                                                padding: '7px',
+                                                                fontSize: '14px',
+                                                                marginRight: '10px'
+                                                            }}
+                                                        >
+                                                            {[...Array(100)].map((_, idx) => (
+                                                                <option key={idx + 1} value={idx + 1}>{idx + 1}</option>
+                                                            ))}
+                                                        </select>
+
+                                                        <button
+                                                            onClick={() => removerDoCarrinho(item.id)}
+                                                            style={{
+                                                                backgroundColor: 'white',
+                                                                color: 'black',
+                                                                border: '1px solid black',
+                                                                borderRadius: '5px',
+                                                                padding: '6px 12px',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            <FaTrashAlt style={{ marginBottom: '4px' }} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                                R$ {(item.preco).toFixed(2)}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Lado direito - Resumo e Finalizar Compra */}
+                    {clienteLogado && (
+                        <div style={{
+                            marginTop: '20px',
+                            width: '28%',
+                            backgroundColor: 'black',
                             padding: '20px',
-                            marginBottom: '30px',
-                            textAlign: 'center',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                        }}
-                    >
-                        <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
-                            {mensagem}
-                        </p>
-                        <div>
-                            <Link href="/paginas/login">
-                                <button
-                                    style={{
-                                        backgroundColor: '#007bff',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        padding: '12px 20px',
-                                        cursor: 'pointer',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        marginRight: '15px',
-                                        transition: 'background-color 0.3s',
-                                    }}
-                                    onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-                                    onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
-                                >
-                                    Fazer Login
-                                </button>
-                            </Link>
-                            <Link href="/paginas/cadastros">
-                                <button
-                                    style={{
-                                        backgroundColor: '#28a745',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        padding: '12px 20px',
-                                        cursor: 'pointer',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        marginLeft: '15px',
-                                        transition: 'background-color 0.3s',
-                                    }}
-                                    onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-                                    onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-                                >
-                                    Cadastre-se
-                                </button>
-                            </Link>
-                        </div>
-                    </div>
-                )}
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        }}>
+                            {/* Quadrado do Total */}
+                            <div style={{
+                                backgroundColor: '#f8f9fa',
+                                padding: '20px',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            }}>
+                                <h4 style={{ textAlign: 'center', fontSize: '20px', marginBottom: '10px' }}>
+                                    TOTAL DO CARRINHO
+                                </h4>
+                                {/* Verifica se o carrinho está vazio */}
+                                {carrinho.length > 0 ? (
+                                    <div style={{ fontSize: '22px', fontWeight: 'bold', textAlign: 'center' }}>
+                                        R$ {calcularTotal()}
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: '18px', textAlign: 'center', color: '#888' }}>
+                                        Seu carrinho está vazio
+                                    </div>
+                                )}
+                                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                    {carrinho.length > 0 ? (
+                                        <Link href="/paginas/carrinho">
+                                            <button
+                                                style={{
+                                                    backgroundColor: '#28a745',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '5px',
+                                                    padding: '15px 30px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '18px',
+                                                    fontWeight: 'bold',
+                                                }}
+                                            >
+                                                Finalizar Compra
+                                            </button>
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            disabled
+                                            style={{
+                                                backgroundColor: '#ddd',
+                                                color: '#888',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                padding: '15px 30px',
+                                                cursor: 'not-allowed',
+                                                fontSize: '18px',
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            Finalizar Compra
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
 
-                {clienteLogado && carrinho.length === 0 && (
-                    <p style={{ textAlign: 'center', fontSize: '18px' }}>O carrinho está vazio.</p>
-                )}
+                            {/* Novo Quadrado - Opções de Pagamento */}
+                            <div style={{
+                                backgroundColor: '#f8f9fa',
+                                padding: '20px',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                marginTop: '20px',
+                            }}>
+                                <h4 style={{ textAlign: 'center', fontSize: '20px', marginBottom: '20px' }}>
+                                    Opções de Pagamento
+                                </h4>
 
-                {clienteLogado && carrinho.length > 0 && (
-                    <>
-                        <h2 style={{ textAlign: 'center', fontFamily: 'Montserrat, sans-serif', fontWeight: '900' }}>
-                            Carrinho de Compras
-                        </h2>
-                        <ul style={{ listStyleType: 'none', padding: 0 }}>
-                            {carrinho.map(item => (
-                                <li key={item.id} style={{ borderBottom: '1px solid #ddd', padding: '15px 0', display: 'flex', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+                                    {/* Ícones dos Cartões e Pix */}
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <img src={item.imagem} alt={item.nome} style={{ width: '70px', height: '70px', objectFit: 'contain', marginRight: '15px' }} />
-                                        <div>
-                                            <h5 style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{item.nome}</h5>
-                                            <p style={{ margin: '5px 0', fontSize: '16px' }}>R$ {item.preco.toFixed(2)}</p>
-                                            <p style={{ margin: '0', fontSize: '16px' }}>Quantidade: {item.quantidade}</p>
-                                        </div>
+                                        <FaCcMastercard style={{ fontSize: '40px', color: 'black' }} />
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <button
-                                            onClick={() => atualizarQuantidade(item.id, item.quantidade - 1)}
-                                            disabled={item.quantidade <= 1}
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
-                                        >
-                                            <FaMinus />
-                                        </button>
-                                        <button
-                                            onClick={() => atualizarQuantidade(item.id, item.quantidade + 1)}
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
-                                        >
-                                            <FaPlus />
-                                        </button>
-                                        <button
-                                            onClick={() => removerDoCarrinho(item.id)}
-                                            style={{ backgroundColor: 'black', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px', cursor: 'pointer', marginLeft: '10px', fontSize: '16px' }}
-                                        >
-                                            <FaTrashAlt />
-                                        </button>
+                                        <FaCcVisa style={{ fontSize: '40px', color: 'black' }} />
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <img
+                                            src="https://clipground.com/images/elo-png-4.png"
+                                            alt="Elo"
+                                            style={{ width: '50px', height: '30px' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <FaPix style={{ fontSize: '35px', color: 'black' }} />
+                                    </div>
+                                </div>
+                            </div>
 
-                        <h4 style={{ textAlign: 'center', fontSize: '20px', marginTop: '20px' }}>Total: R$ {calcularTotal()}</h4>
-
-                        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                            <Link href="/paginas/checkout">
-                                <button
-                                    style={{
-                                        backgroundColor: '#28a745',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        padding: '15px 30px',
-                                        cursor: 'pointer',
+                            {/* Novo Quadrado - Frete Grátis */}
+                            <div style={{
+                                backgroundColor: '#f8f9fa',
+                                padding: '20px',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                marginTop: '20px',
+                            }}>
+                                <h4 style={{ textAlign: 'center', fontSize: '20px', marginBottom: '20px' }}>
+                                    FRETE GRÁTIS
+                                </h4>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    fontSize: '18px',
+                                }}>
+                                    <FaShippingFast style={{ fontSize: '30px', color: 'green' }} />
+                                    <p style={{
+                                        marginLeft: '10px',
                                         fontSize: '18px',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    Finalizar Compra
-                                </button>
-                            </Link>
+                                    }}>
+                                        Aproveite o Frete Grátis para sua compra!
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </>
-                )}
+                    )}
+                </div>
             </div>
         </Pagina2>
     );

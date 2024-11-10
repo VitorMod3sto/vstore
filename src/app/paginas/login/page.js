@@ -2,6 +2,7 @@
 import Pagina2 from '@/app/components/Pagina2';
 import { useEffect, useState } from 'react';
 import Link from 'next/link'; // Importando o Link
+import { BiLogoVuejs } from 'react-icons/bi';
 
 export default function Page() {
     const [email, setEmail] = useState('');
@@ -61,7 +62,7 @@ export default function Page() {
                     marginBottom: '30px',
                     color: 'white'
                 }}>
-                   BEM VINDO DE VOLTA
+                   BEM VINDO DE VOLTA <BiLogoVuejs style={{fontSize:'45px'}} />
                 </h2>
 
                 <div style={{ marginBottom: '20px' }}>
@@ -130,7 +131,7 @@ export default function Page() {
                         transition: 'background-color 0.3s ease'
                     }}
                 >
-                    ENTRAR
+                    ENTRAR 
                 </button>
 
                 {/* Botão de Cadastro */}

@@ -7,10 +7,12 @@ import Link from 'next/link';
 import { FaCheckCircle, FaChevronLeft, FaChevronRight, FaEdgeLegacy, FaExclamationCircle, FaShoppingCart } from 'react-icons/fa';
 import { RiMastercardFill } from "react-icons/ri";
 import { RiVisaFill } from "react-icons/ri";
-import { BiSolidPurchaseTagAlt } from 'react-icons/bi';
+import { BiLogoVuejs, BiSolidPurchaseTagAlt } from 'react-icons/bi';
 
 
 export default function Page({ params }) {
+    const [loading, setLoading] = useState(true);
+
     const [produto, setProduto] = useState({});
     // Estado para armazenar os produtos
 
@@ -45,9 +47,12 @@ export default function Page({ params }) {
         // Armazenando os produtos filtrados pela mesma categoria do produto atual
         setProdutosCategoria(produtosDaMesmaCategoria);
         // Atualiza o estado com produtos da mesma categoria
+
+        setLoading(false);
     }, [params.id]);
     // Definindo que o useEffect será chamado sempre que o id mudar (params) mudar
 
+   
 
     const produtosRepetidos = produtosCategoria.length > 0
         // Criando um array que repete os produtos da mesma categoria até completar 100 produtos
@@ -121,7 +126,6 @@ export default function Page({ params }) {
     useEffect(() => {
         const cliente = JSON.parse(localStorage.getItem('clienteLogado'));
         if (cliente) {
-            console.log('Cliente logado:', cliente); // Adicionei um console.log para debug
             setClienteLogado(cliente);
             carregarCarrinho(cliente.email);
         }
@@ -146,12 +150,10 @@ export default function Page({ params }) {
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
     
         if (!clienteLogado) {
-            console.log('Cliente não logado, mostrando a modal de login');
             handleOpenModalLogin();  // Exibe a modal de login
             return;  // Sai da função caso não esteja logado
         }
     
-        console.log('Cliente logado, adicionando ao carrinho');
     
         // Lógica para adicionar o produto ao carrinho se o cliente estiver logado
         const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
@@ -207,6 +209,42 @@ export default function Page({ params }) {
         // Fechar a modal
         handleCloseModalLogin();
     };
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '100vh',
+                backgroundColor: 'white',
+            }}>
+                <BiLogoVuejs style={{
+                    fontSize: '50px',
+                    color: 'black',
+                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
+                    transformOrigin: 'center center',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                <style>
+                    {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1); /* Tamanho original */
+                        }
+                        50% {
+                            transform: scale(1.2); /* Aumenta o tamanho */
+                        }
+                        100% {
+                            transform: scale(1); /* Retorna ao tamanho original */
+                        }
+                    }
+                    `}
+                </style>
+            </div>
+        );
+    }
+
 
 
     return (

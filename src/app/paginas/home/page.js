@@ -5,10 +5,13 @@ import { useEffect, useState } from "react";
 import { Carousel } from "react-bootstrap";
 import Link from 'next/link';
 import { FaChevronLeft, FaChevronRight, FaFireAlt, FaStar } from "react-icons/fa";
+import { BiLogoVuejs } from "react-icons/bi";
 
 
 
 export default function Page() {
+    const [loading, setLoading] = useState(true);
+
     const [produtos, setProdutos] = useState([]);
     // Estado para armazenar os produtos
 
@@ -26,6 +29,7 @@ export default function Page() {
          // Carregando categorias do localStorage (usando JSON parse para converter de string para objeto JavaScript)
         setCategorias(dadosCategorias);
         // Atualizando o estado das categorias
+        setLoading(false);
     }, []);
 
 
@@ -112,6 +116,41 @@ export default function Page() {
     const handleNextBlusas = () => {
         setIndexGrupoBlusas((prev) => (prev === totalGruposBlusas - 1 ? 0 : prev + 1));
     };
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '100vh',
+                backgroundColor: 'white',
+            }}>
+                <BiLogoVuejs style={{
+                    fontSize: '50px',
+                    color: 'black',
+                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
+                    transformOrigin: 'center center',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                <style>
+                    {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1); /* Tamanho original */
+                        }
+                        50% {
+                            transform: scale(1.2); /* Aumenta o tamanho */
+                        }
+                        100% {
+                            transform: scale(1); /* Retorna ao tamanho original */
+                        }
+                    }
+                    `}
+                </style>
+            </div>
+        );
+    }
 
     return (
         <Pagina2 titulo="Home">
@@ -379,7 +418,7 @@ export default function Page() {
                             </div>
                         ))}
                 </div>
-                <Link href={`/paginas/produtos`}>
+                <Link href={`/paginas/marcas/oakley`}>
                     <button style={{
                         fontFamily: 'Montserrat, sans-serif',
                         fontWeight: 'bold',

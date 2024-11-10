@@ -51,29 +51,35 @@ export default function Pagina2(props) {
 
 
 
-    // Função para carregar e atualizar a quantidade total de itens no carrinho
-    const [itensCarrinho, setItensCarrinho] = useState([]);
-    const [quantidadeCarrinho, setQuantidadeCarrinho] = useState(0);
-    const [carrinhoVisivel, setCarrinhoVisivel] = useState(false);
-
-    // Função para carregar os itens do carrinho do localStorage
+    const [itensCarrinho, setItensCarrinho] = useState([]);  // Estado para armazenar os itens do carrinho
+    const [quantidadeCarrinho, setQuantidadeCarrinho] = useState(0); // Quantidade total de itens
+    const [carrinhoVisivel, setCarrinhoVisivel] = useState(false); // Estado para controlar a visibilidade do resumo do carrinho
+    const [clienteLogado, setClienteLogado] = useState(null);
+    // Função para carregar os itens do carrinho e atualizar o contador
     const carregarCarrinho = () => {
-        const itens = JSON.parse(localStorage.getItem('carrinho')) || [];
-        setItensCarrinho(itens);  // Atualiza a lista de produtos no carrinho
-        const totalItens = itens.reduce((acc, item) => acc + item.quantidade, 0);
-        setQuantidadeCarrinho(totalItens);  // Atualiza o total de itens no carrinho
+        const cliente = JSON.parse(localStorage.getItem('clienteLogado')); // Recupera os dados do cliente logado
+        if (cliente) {
+            setClienteLogado(cliente);  // Carrega os dados do cliente logado
+            const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || []; // Recupera os carrinhos do localStorage
+            const carrinhoDoCliente = carrinhos.find(c => c.email === cliente.email);
+            if (carrinhoDoCliente) {
+                setItensCarrinho(carrinhoDoCliente.itens);  // Atualiza os itens do carrinho
+                // Atualiza o contador de itens
+                setQuantidadeCarrinho(carrinhoDoCliente.itens.reduce((total, item) => total + item.quantidade, 0));
+            }
+        }
     };
 
-
-    // Função para monitorar mudanças no localStorage (se outro lugar modificar o carrinho)
+    // Efeito para carregar o carrinho ao montar o componente ou quando o cliente logado mudar
     useEffect(() => {
-        // Atualiza o carrinho ao carregar a página
         carregarCarrinho();
+    }, []);
 
-        // Função para tratar a mudança no localStorage
+    // Função para monitorar mudanças no localStorage
+    useEffect(() => {
         const handleStorageChange = (e) => {
-            if (e.key === 'carrinho') {
-                carregarCarrinho();  // Atualiza os itens e quantidade do carrinho
+            if (e.key === 'carrinhos') {
+                carregarCarrinho(); // Atualiza os itens e a quantidade do carrinho quando o localStorage mudar
             }
         };
 
@@ -84,13 +90,19 @@ export default function Pagina2(props) {
         return () => {
             window.removeEventListener('storage', handleStorageChange);
         };
-    }, []); // Esse useEffect só vai rodar uma vez, quando o componente for montado
+    }, []);
 
-    // Exibe ou esconde o quadrado do carrinho ao clicar no ícone
+    // Função para alternar a visibilidade do resumo do carrinho
     const toggleCarrinho = () => {
         setCarrinhoVisivel(!carrinhoVisivel);
-        carregarCarrinho(); // Sempre que o carrinho for clicado, recarrega os itens
+        carregarCarrinho();  // Ao abrir o carrinho, atualiza os itens e a quantidade
     };
+
+    // Função para calcular o total do carrinho
+    const calcularTotal = () => {
+        return itensCarrinho.reduce((total, item) => total + item.preco * item.quantidade, 0).toFixed(2);
+    };
+
 
     return (
         // Começando componente de Página (Menu + Footer)
@@ -106,7 +118,7 @@ export default function Pagina2(props) {
                     fontWeight: "bold",
                 }}
             >
-                Frete grátis pra todo Brasil! <FaTruckFast style={{ fontSize: "20px", marginBottom: "02px" }} />
+                Frete grátis acima de R$200,00! <FaTruckFast style={{ fontSize: "20px", marginBottom: "02px" }} />
             </div>
 
             {/* CRIANDO MENU NAVBAR*/}
@@ -222,9 +234,9 @@ export default function Pagina2(props) {
                                 marginLeft: "10px",
                                 marginTop: "5px",
                                 position: "relative",
-                                cursor:'pointer',
+                                cursor: 'pointer',
                             }}
-                            onClick={toggleCarrinho} // Aciona a visibilidade do quadrado e carrega os produtos
+                            onClick={toggleCarrinho}
                         >
                             <FaShoppingCart
                                 style={{
@@ -250,74 +262,90 @@ export default function Pagina2(props) {
                             )}
                         </div>
 
-                        {/* Quadrado com os itens do carrinho */}
+                        {/* Resumo do Carrinho */}
                         {carrinhoVisivel && (
                             <div
                                 style={{
                                     position: "absolute",
-                                    top: "70px",         // Distância do topo para o quadrado aparecer abaixo do ícone
-                                    right: "10px",       // Alinha o quadrado ao lado direito (com alinhamento do carrinho)
-                                    width: "300px",      // Largura do quadrado
+                                    top: "70px",
+                                    right: "10px",
+                                    width: "300px",
                                     backgroundColor: "#fff",
                                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
                                     padding: "10px",
-                                    zIndex: 999,         // Garante que o quadrado fique sobre outros elementos
-                                    borderRadius: "8px", // Arredondamento das bordas
-                                    border: "1px solid black", // Borda preta fina
+                                    zIndex: 999,
+                                    borderRadius: "8px",
+                                    border: "1px solid black",
+                                    display: "flex",
+                                    flexDirection: "column",   // Flex column for items and button
+                                    maxHeight: "400px",         // Limitar a altura máxima
                                 }}
                             >
                                 <h5>Itens no Carrinho</h5>
-                                {/* Linha mais grossa separando o título dos itens */}
                                 <hr style={{ border: "2px solid #ddd", marginBottom: "10px" }} />
-
-                                {itensCarrinho.length === 0 ? (
-                                    <p>Seu carrinho está vazio.</p>
-                                ) : (
-                                    itensCarrinho.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            style={{
-                                                marginBottom: "10px",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                borderBottom: "1px solid #ddd", // Linha fina separando os itens
-                                                paddingBottom: "10px", // Um pouco de espaço entre o item e a linha
-                                                paddingTop: "10px", // Um pouco de espaço no topo do item
-                                            }}
-                                        >
-                                            {/* Imagem do produto */}
-                                            <img
-                                                src={item.imagem}
-                                                alt={item.nome}
-                                                style={{ width: "50px", height: "50px", marginRight: "10px" }}
-                                            />
-
-                                            {/* Nome do produto e a quantidade */}
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: "bold", marginBottom: "5px" }}>{item.nome}</div> {/* Margem abaixo do nome */}
-                                                <div style={{ fontSize: "12px", color: "gray" }}>
-                                                    Quantidade: {item.quantidade}
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        overflowY: "auto",        // Permitir scroll vertical nos itens
+                                        maxHeight: "300px",        // Limitar altura dos itens
+                                        marginBottom: "10px",
+                                    }}
+                                >
+                                    {itensCarrinho.length === 0 ? (
+                                        <p>Seu carrinho está vazio.</p>
+                                    ) : (
+                                        itensCarrinho.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                style={{
+                                                    marginBottom: "10px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    borderBottom: "1px solid #ddd",
+                                                    paddingBottom: "10px",
+                                                    paddingTop: "10px",
+                                                }}
+                                            >
+                                                <img
+                                                    src={item.imagem}
+                                                    alt={item.nome}
+                                                    style={{
+                                                        width: "50px",
+                                                        height: "50px",
+                                                        marginRight: "10px",
+                                                    }}
+                                                />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                                                        {item.nome}
+                                                    </div>
+                                                    <div style={{ fontSize: "12px", color: "gray" }}>
+                                                        Quantidade: {item.quantidade}
+                                                    </div>
+                                                </div>
+                                                <div style={{ fontWeight: "bold", marginLeft: "20px" }}>
+                                                    R$ {item.preco.toFixed(2)}
                                                 </div>
                                             </div>
-
-                                            {/* Preço do produto */}
-                                            <div style={{ fontWeight: "bold", marginLeft: "20px" }}> {/* Aumenta o espaço horizontal entre nome e preço */}
-                                                R$ {item.preco.toFixed(2)}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                                {/* Exibindo o total do carrinho */}
-                                {itensCarrinho.length > 0 && (
-                                    <div style={{ marginTop: "5px", fontWeight: "bold" }}> {/* Diminuindo o marginTop */}
-                                        <p>Total: R$ {itensCarrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0).toFixed(2)}</p>
-                                    </div>
-                                )}
+                                        ))
+                                    )}
+                                </div>
+                                <div style={{ marginTop: "5px", fontWeight: "bold" }}>
+                                    <p>Total: R$ {calcularTotal()}</p>
+                                </div>
+                                <Link href="/paginas/carrinho">
+                                    <Button style={{
+                                        backgroundColor: 'black',
+                                        color: 'white',
+                                        border: 'none',
+                                        width: '100%',
+                                    }}>
+                                        Ver Carrinho
+                                    </Button>
+                                </Link>
                             </div>
-
-
-
                         )}
+
 
                         {/* Criando botão de criar conta ou fazer Login (Usando Drop Down ao clicar no ícone de pessoa )*/}
                         <Nav className="ms-auto">
@@ -350,10 +378,10 @@ export default function Pagina2(props) {
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu align="end">
-                                    <Dropdown.Item href="/" style={{ color: "#003366" }}>
+                                    <Dropdown.Item href="/paginas/login" style={{ color: "black" }}>
                                         <b>Login</b>
                                     </Dropdown.Item>
-                                    <Dropdown.Item href="/" style={{ color: "#003366" }}>
+                                    <Dropdown.Item href="/paginas/cadastros" style={{ color: "black" }}>
                                         <b>Cadastre-se</b>
                                     </Dropdown.Item>
                                 </Dropdown.Menu>
@@ -380,7 +408,7 @@ export default function Pagina2(props) {
             >
                 {/* Definindo que ao clicar na Modal e abri-la (puxando a função abrirModal irá exibir:*/}
 
-                <Modal.Header style={{ backgroundColor: "#003366", color: "white" }}>
+                <Modal.Header style={{ backgroundColor: "black", color: "white" }}>
                     <Modal.Title>
                         <IoPersonCircleOutline
                             style={{ marginBottom: "05px", marginRight: "02px", fontSize: "35px" }}
@@ -390,7 +418,7 @@ export default function Pagina2(props) {
                 </Modal.Header>
                 {/* Mensagem de olá */}
 
-                <Modal.Body style={{ backgroundColor: "#003366", color: "white", fontSize: "20px" }}>
+                <Modal.Body style={{ backgroundColor: "black", color: "white", fontSize: "20px" }}>
                     <ul style={{ padding: 0, listStyleType: "none" }}>
                         <li>
                             <AiFillHome style={{ marginBottom: "06px" }} /> Minha Conta
@@ -410,7 +438,7 @@ export default function Pagina2(props) {
                 {/* Criando opções da Modal */}
 
                 {/* Criando Footer da Modal*/}
-                <Modal.Footer style={{ backgroundColor: "#003366", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Modal.Footer style={{ backgroundColor: "black", display: "flex", flexDirection: "column", alignItems: "center" }}>
 
                     {/* Criando botões de cadastro ou login */}
                     <Button
@@ -419,7 +447,7 @@ export default function Pagina2(props) {
                             width: "100%",
                             margin: "10px 0",
                             fontWeight: "bold",
-                            color: "#003366",
+                            color: "black",
                             backgroundColor: "white",
                         }}
                         href="/login"
@@ -434,7 +462,7 @@ export default function Pagina2(props) {
                             margin: "10px 0",
                             fontWeight: "bold",
                             color: "white",
-                            backgroundColor: "#003366",
+                            backgroundColor: "black",
                             border: "none",
                         }}
                         href="/cadastro"

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link'; // Importando o componente Link
 import Pagina2 from "@/app/components/Pagina2";
+import { BiLogoVuejs } from 'react-icons/bi';
 
 export default function Cadastro() {
     const [nome, setNome] = useState('');
@@ -65,7 +66,7 @@ export default function Cadastro() {
                     marginBottom: '30px',
                     color: 'white'
                 }}>
-                    CADASTRO DE CLIENTE
+                    CADASTRE-SE AGORA  <BiLogoVuejs style={{fontSize:'45px'}} />
                 </h2>
 
                 <div style={{ marginBottom: '20px' }}>

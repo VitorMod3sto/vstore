@@ -4,8 +4,11 @@ import Pagina2 from "@/app/components/Pagina2";
 import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { Row, Col, Card, Dropdown, Container } from 'react-bootstrap';
+import { BiLogoVuejs } from "react-icons/bi";
 
 export default function Page({ params }) {
+    const [loading, setLoading] = useState(true);
+
     const [produtos, setProdutos] = useState([]);
     // Estado para armazenar todos os produtos
 
@@ -44,6 +47,7 @@ export default function Page({ params }) {
         // Atualizando as marcas com as marcas salvas no LocalStorage
         setTamanhos(tamanhosLocal);
         // Atualizando os tamanhos com os tamanhos dos produtos da categoria
+        setLoading(false);
     }, []);
 
     const filtrarProdutos = () => {
@@ -77,6 +81,42 @@ export default function Page({ params }) {
         // Definindo o useEffect pra função de filtro pra ela ser chamada sempre que os filtros mudarem
         filtrarProdutos();
     }, [marcaSelecionada, tamanhoSelecionado, ordemPreco]);
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '100vh',
+                backgroundColor: 'white',
+            }}>
+                <BiLogoVuejs style={{
+                    fontSize: '50px',
+                    color: 'black',
+                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
+                    transformOrigin: 'center center',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                <style>
+                    {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1); /* Tamanho original */
+                        }
+                        50% {
+                            transform: scale(1.2); /* Aumenta o tamanho */
+                        }
+                        100% {
+                            transform: scale(1); /* Retorna ao tamanho original */
+                        }
+                    }
+                    `}
+                </style>
+            </div>
+        );
+    }
+
 
     return (
         <Pagina2 titulo='Categoria'>
