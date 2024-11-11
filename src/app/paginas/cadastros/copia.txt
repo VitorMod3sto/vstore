@@ -426,7 +426,7 @@ export default function Cadastro() {
             lineHeight: '1.6',
             marginBottom: '20px',
         }}>
-            Você acaba de se juntar à nossa família ! <br />
+            Você acaba de se juntar à nossa comunidade! <br />
             Um e-mail de boas-vindas foi enviado para o seu endereço de e-mail e nele você encontrará uma surpresa especial! 🎁
         </p>
         <button

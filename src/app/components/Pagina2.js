@@ -103,6 +103,15 @@ export default function Pagina2(props) {
         return itensCarrinho.reduce((total, item) => total + item.preco * item.quantidade, 0).toFixed(2);
     };
 
+    // Função para logout
+    const logout = () => {
+        // Limpar o cliente logado no localStorage
+        localStorage.removeItem('clienteLogado');
+        // Limpar o estado de clienteLogado
+        setClienteLogado(null);
+        // Pode redirecionar para a página inicial ou para o login após o logout
+        window.location.reload(); // ou usar `router.push('/home')` se estiver usando `next/router`
+    };
 
     return (
         // Começando componente de Página (Menu + Footer)
@@ -347,10 +356,9 @@ export default function Pagina2(props) {
                         )}
 
 
-                        {/* Criando botão de criar conta ou fazer Login (Usando Drop Down ao clicar no ícone de pessoa )*/}
+                        {/* Menu do usuário */}
                         <Nav className="ms-auto">
                             <Dropdown>
-
                                 <Dropdown.Toggle
                                     as={Nav.Link}
                                     style={{
@@ -378,14 +386,26 @@ export default function Pagina2(props) {
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu align="end">
-                                    <Dropdown.Item href="/paginas/login" style={{ color: "black" }}>
-                                        <b>Login</b>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item href="/paginas/cadastros" style={{ color: "black" }}>
-                                        <b>Cadastre-se</b>
-                                    </Dropdown.Item>
+                                    {clienteLogado ? (
+                                        // Exibe apenas a opção "Sair" se o cliente estiver logado
+                                        <Dropdown.Item
+                                            onClick={logout}
+                                            style={{ color: "black", fontWeight: "bold" }}
+                                        >
+                                            <b>Sair</b>
+                                        </Dropdown.Item>
+                                    ) : (
+                                        <>
+                                            {/* Exibe as opções de Login e Cadastro se o cliente não estiver logado */}
+                                            <Dropdown.Item href="/paginas/login" style={{ color: "black" }}>
+                                                <b>Login</b>
+                                            </Dropdown.Item>
+                                            <Dropdown.Item href="/paginas/cadastros" style={{ color: "black" }}>
+                                                <b>Cadastre-se</b>
+                                            </Dropdown.Item>
+                                        </>
+                                    )}
                                 </Dropdown.Menu>
-
                             </Dropdown>
                         </Nav>
                     </Navbar.Collapse>
@@ -411,10 +431,11 @@ export default function Pagina2(props) {
                 <Modal.Header style={{ backgroundColor: "black", color: "white" }}>
                     <Modal.Title>
                         <IoPersonCircleOutline
-                            style={{ marginBottom: "05px", marginRight: "02px", fontSize: "35px" }}
+                            style={{ marginBottom: "05px", marginRight: "04px", fontSize: "35px" }}
                         />
-                        Olá, seja bem vindo!
+                        {clienteLogado && clienteLogado.nome ? `Olá, ${clienteLogado.nome}, seja bem-vindo!` : "Olá, seja bem-vindo!"}
                     </Modal.Title>
+
                 </Modal.Header>
                 {/* Mensagem de olá */}
 
@@ -440,37 +461,42 @@ export default function Pagina2(props) {
                 {/* Criando Footer da Modal*/}
                 <Modal.Footer style={{ backgroundColor: "black", display: "flex", flexDirection: "column", alignItems: "center" }}>
 
-                    {/* Criando botões de cadastro ou login */}
-                    <Button
-                        variant="light"
-                        style={{
-                            width: "100%",
-                            margin: "10px 0",
-                            fontWeight: "bold",
-                            color: "black",
-                            backgroundColor: "white",
-                        }}
-                        href="/login"
-                    >
-                        LOGIN
-                    </Button>
+                    {/* Exibir botões de login e cadastro apenas se o cliente não estiver logado */}
+                    {!clienteLogado ? (
+                        <>
+                            <Button
+                                variant="light"
+                                style={{
+                                    width: "100%",
+                                    margin: "10px 0",
+                                    fontWeight: "bold",
+                                    color: "black",
+                                    backgroundColor: "white",
+                                }}
+                                href="/login"
+                            >
+                                LOGIN
+                            </Button>
 
-                    <Button
-                        variant="light"
-                        style={{
-                            width: "100%",
-                            margin: "10px 0",
-                            fontWeight: "bold",
-                            color: "white",
-                            backgroundColor: "black",
-                            border: "none",
-                        }}
-                        href="/cadastro"
-                    >
-                        CADASTRE-SE
-                    </Button>
+                            <Button
+                                variant="light"
+                                style={{
+                                    width: "100%",
+                                    margin: "10px 0",
+                                    fontWeight: "bold",
+                                    color: "white",
+                                    backgroundColor: "black",
+                                    border: "none",
+                                }}
+                                href="/cadastro"
+                            >
+                                CADASTRE-SE
+                            </Button>
+                        </>
+                    ) : null} {/* Não renderiza os botões se o cliente estiver logado */}
 
                 </Modal.Footer>
+
             </Modal>
 
             <Container fluid className="my-2">

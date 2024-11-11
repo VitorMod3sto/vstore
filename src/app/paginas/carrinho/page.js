@@ -125,12 +125,28 @@ export default function CarrinhoPage() {
                 minHeight: '100vh',
                 backgroundColor: 'white',
             }}>
-                <div style={{
+                <BiLogoVuejs style={{
                     fontSize: '50px',
                     color: 'black',
-                    animation: 'pulse 1.5s ease-in-out infinite',
+                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
                     transformOrigin: 'center center',
-                }}>...</div>
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                <style>
+                    {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1); /* Tamanho original */
+                        }
+                        50% {
+                            transform: scale(1.2); /* Aumenta o tamanho */
+                        }
+                        100% {
+                            transform: scale(1); /* Retorna ao tamanho original */
+                        }
+                    }
+                    `}
+                </style>
             </div>
         );
     }
@@ -166,48 +182,72 @@ export default function CarrinhoPage() {
                             minHeight: '100vh',
                         }}>
                             <div style={{
-                                textAlign: 'center',
-                                backgroundColor: 'white',
-                                padding: '30px',
+                                border:'1px solid white',
+                                padding: '40px',
+                                width: '400px',
+                                margin: '50px auto', // Margem superior e inferior
+                                backgroundColor: 'black',
                                 borderRadius: '8px',
-                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                width: '80%',
-                                maxWidth: '600px',
+                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                                color: 'white', // Para garantir que o texto seja visível
+                                textAlign: 'center',
                             }}>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
+                                {/* Título */}
+                                <h2 style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: '700',
+                                    fontSize: '24px',
+                                    marginBottom: '30px',
+                                    color: 'white',
+                                }}>
+                                    BEM VINDO A VSTORE <BiLogoVuejs style={{ fontSize: '45px' }} />
+                                </h2>
+
+                                {/* Mensagem */}
+                                <p style={{
+                                    fontSize: '18px',
+                                    fontWeight: 'bold',
+                                    marginBottom: '20px',
+                                }}>
                                     {mensagem}
                                 </p>
+
+                                {/* Botões */}
                                 <div>
+                                    {/* Botão de Login */}
                                     <button
+                                        onClick={abrirModalLogin}
                                         style={{
-                                            backgroundColor: '#007bff',
-                                            color: 'white',
+                                            width: '100%',
+                                            padding: '12px',
+                                            backgroundColor: 'white',
+                                            color: 'black',
                                             border: 'none',
                                             borderRadius: '5px',
-                                            padding: '12px 20px',
                                             cursor: 'pointer',
                                             fontSize: '16px',
                                             fontWeight: 'bold',
-                                            marginRight: '15px',
-                                            transition: 'background-color 0.3s',
+                                            transition: 'background-color 0.3s ease',
+                                            marginBottom: '15px',
                                         }}
-                                        onClick={abrirModalLogin} // Abre o formulário de login
                                     >
-                                        Fazer Login
+                                        FAZER LOGIN
                                     </button>
+
+                                    {/* Botão de Cadastro */}
                                     <Link href="/paginas/cadastros">
                                         <button
                                             style={{
-                                                backgroundColor: '#28a745',
+                                                width: '100%',
+                                                padding: '12px',
+                                                backgroundColor: 'black',
                                                 color: 'white',
                                                 border: 'none',
                                                 borderRadius: '5px',
-                                                padding: '12px 20px',
                                                 cursor: 'pointer',
                                                 fontSize: '16px',
                                                 fontWeight: 'bold',
-                                                marginLeft: '15px',
-                                                transition: 'background-color 0.3s',
+                                                transition: 'background-color 0.3s ease',
                                             }}
                                         >
                                             Cadastre-se
@@ -217,6 +257,7 @@ export default function CarrinhoPage() {
                             </div>
                         </div>
                     )}
+
 
                     {/* Modal de Login */}
                     {showLoginForm && (
@@ -538,12 +579,11 @@ export default function CarrinhoPage() {
                                     alignItems: 'center',
                                     fontSize: '18px',
                                 }}>
-                                    <FaShippingFast style={{ fontSize: '30px', color: 'green' }} />
                                     <p style={{
                                         marginLeft: '10px',
                                         fontSize: '18px',
                                     }}>
-                                        Aproveite o Frete Grátis para sua compra!
+                                        APROVEITE FRETE GRÁTIS ACIMA DE R$200,00!  <FaShippingFast style={{ fontSize: '25px', color: 'black' }} />
                                     </p>
                                 </div>
                             </div>

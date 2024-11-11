@@ -8,6 +8,7 @@ export default function Page() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mensagem, setMensagem] = useState('');
+    const [corMensagem, setCorMensagem] = useState(''); // Para controlar a cor da mensagem
 
     // Salva a página anterior quando o componente é montado
     useEffect(() => {
@@ -25,17 +26,20 @@ export default function Page() {
 
         if (!cliente) {
             setMensagem('E-mail não encontrado!');
+            setCorMensagem('red'); // Cor vermelha para erro
             return;
         }
 
         if (cliente.senha !== senha) {
             setMensagem('Senha incorreta!');
+            setCorMensagem('red'); // Cor vermelha para erro
             return;
         }
 
         // Salvando o cliente logado no localStorage
         localStorage.setItem('clienteLogado', JSON.stringify(cliente));
         setMensagem('Login bem-sucedido!');
+        setCorMensagem('green'); // Cor verde para sucesso
 
         // Redirecionar para a página anterior ou para a página inicial
         const previousPage = localStorage.getItem('previousPage') || '/paginas/home'; // Padrão para /paginas/home
@@ -105,7 +109,7 @@ export default function Page() {
                     {mensagem && (
                         <p style={{
                             textAlign: 'center',
-                            color: 'red',
+                            color: corMensagem, // Usando a cor dinâmica
                             marginTop: '15px',
                             fontSize: '14px',
                             fontWeight: 'bold'

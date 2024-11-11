@@ -13,6 +13,8 @@ import { BiLogoVuejs, BiSolidPurchaseTagAlt } from 'react-icons/bi';
 export default function Page({ params }) {
     const [loading, setLoading] = useState(true);
 
+    const [corMensagem, setCorMensagem] = useState(''); // Para controlar a cor da mensagem
+
     const [produto, setProduto] = useState({});
     // Estado para armazenar os produtos
 
@@ -52,7 +54,7 @@ export default function Page({ params }) {
     }, [params.id]);
     // Definindo que o useEffect será chamado sempre que o id mudar (params) mudar
 
-   
+
 
     const produtosRepetidos = produtosCategoria.length > 0
         // Criando um array que repete os produtos da mesma categoria até completar 100 produtos
@@ -148,23 +150,23 @@ export default function Page({ params }) {
     const adicionarAoCarrinho = (produto) => {
         // Recarregar o cliente logado sempre que a função for chamada
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
-    
+
         if (!clienteLogado) {
             handleOpenModalLogin();  // Exibe a modal de login
             return;  // Sai da função caso não esteja logado
         }
-    
-    
+
+
         // Lógica para adicionar o produto ao carrinho se o cliente estiver logado
         const carrinhos = JSON.parse(localStorage.getItem('carrinhos')) || [];
         let carrinhoDoCliente = carrinhos.find(c => c.email === clienteLogado.email);
-    
+
         if (!carrinhoDoCliente) {
             // Se não houver carrinho, cria um novo
             carrinhoDoCliente = { email: clienteLogado.email, itens: [] };
             carrinhos.push(carrinhoDoCliente);
         }
-    
+
         // Verifica se o produto já está no carrinho
         const itemExistente = carrinhoDoCliente.itens.find(item => item.id === produto.id);
         if (itemExistente) {
@@ -174,13 +176,13 @@ export default function Page({ params }) {
             // Caso não exista, adiciona o produto ao carrinho
             carrinhoDoCliente.itens.push({ ...produto, quantidade: 1 });
         }
-    
+
         // Atualiza o localStorage com o carrinho
         localStorage.setItem('carrinhos', JSON.stringify(carrinhos));
-    
+
         // Atualiza o estado do carrinho
         setCarrinho(carrinhoDoCliente.itens);
-    
+
         // Exibe o modal de resumo
         setExibirModalResumo(true);
     };
@@ -195,17 +197,25 @@ export default function Page({ params }) {
     // Função de login
     const loginCliente = () => {
         const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        const cliente = clientes.find(cliente => cliente.email === email && cliente.senha === senha);
+        const cliente = clientes.find(cliente => cliente.email === email);
 
         if (!cliente) {
-            setMensagem('E-mail ou senha inválidos!');
+            setMensagem('E-mail não encontrado!');
+            setCorMensagem('red'); // Cor vermelha para erro
+            return;
+        }
+
+        if (cliente.senha !== senha) {
+            setMensagem('Senha incorreta!');
+            setCorMensagem('red'); // Cor vermelha para erro
             return;
         }
 
         // Salvando o cliente logado no localStorage
         localStorage.setItem('clienteLogado', JSON.stringify(cliente));
         setMensagem('Login bem-sucedido!');
-        
+        setCorMensagem('green'); // Cor verde para sucesso
+
         // Fechar a modal
         handleCloseModalLogin();
     };
@@ -586,93 +596,182 @@ export default function Page({ params }) {
                 </Modal.Footer>
             </Modal>
 
-           
-            <Modal show={showModalLogin} onHide={handleCloseModalLogin}>
-            <Modal.Header closeButton>
-                <Modal.Title>Por favor, faça login ou cadastre-se</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {/* Se o estado showLoginForm for true, mostrar o formulário de login */}
-                {showLoginForm ? (
-                    <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
-                        <div style={{ marginBottom: '10px' }}>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="E-mail"
-                                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
-                            />
-                            <input
-                                type="password"
-                                value={senha}
-                                onChange={(e) => setSenha(e.target.value)}
-                                placeholder="Senha"
-                                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}
-                            />
-                        </div>
 
-                        <button
-                            onClick={loginCliente}
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                backgroundColor: '#007bff',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Entrar
-                        </button>
+            <Modal style={{ marginTop: '100px'}} show={showModalLogin} onHide={handleCloseModalLogin}>
+                {/* Exibe somente o título quando showLoginForm for falso */}
+                {!showLoginForm && (
+                    <Modal.Header style={{
+                        backgroundColor: 'black',  // Fundo claro para destacar a informação
+                        borderBottom: '2px solid #ddd',  // Linha sutil na parte inferior
+                        padding: '20px 40px',  // Mais espaço interno
+                        textAlign: 'center',
+                        color: '#343a40',  // Cor do texto escura para contraste
+                        fontFamily: 'Montserrat, sans-serif',  // Fonte moderna
+                        fontWeight: '600',
+                        border:'1px solid white' 
+                    }}>
+                        <Modal.Title style={{
+                            fontSize: '24px',
+                            fontWeight: '700',
+                            color: 'white'
+                        }}>
+                            JÁ TEM UMA CONTA? <BiLogoVuejs style={{ fontSize: '30px', marginBottom: '05px' }} />
+                        </Modal.Title>
+                        <p style={{
+                            fontSize: '16px',
+                            color: 'white',  // Cor mais suave para o subtítulo
+                            fontWeight: '400',
+                            lineHeight: '1.6',
+                            margin: '0',
+                            marginLeft: '08px'
+                        }}>
+                            Para acessar o carrinho, por favor, entre ou crie uma conta.
+                        </p>
+                    </Modal.Header>
 
-                        {mensagem && <p style={{ textAlign: 'center', color: 'red', marginTop: '10px' }}>{mensagem}</p>}
-                    </div>
-                ) : (
-                    // Caso contrário, mostrar as opções de login e cadastro
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <button
-                            onClick={() => setShowLoginForm(true)}  // Alterando para exibir o formulário de login
-                            style={{
-                                fontFamily: 'Montserrat, sans-serif',
-                                fontWeight: 'bold',
-                                backgroundColor: 'black',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                padding: '10px 20px',
-                                cursor: 'pointer',
-                                width: '48%'
-                            }}
-                        >
-                            Login
-                        </button>
-                        <button
-                            style={{
-                                fontFamily: 'Montserrat, sans-serif',
-                                fontWeight: 'bold',
-                                backgroundColor: 'black',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                padding: '10px 20px',
-                                cursor: 'pointer',
-                                width: '48%'
-                            }}
-                            onClick={() => window.location.href = '/paginas/cadastros'}  // Redirecionando para a página de cadastro
-                        >
-                            Cadastrar-se
-                        </button>
-                    </div>
                 )}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseModalLogin}>
-                    Fechar
-                </Button>
-            </Modal.Footer>
-        </Modal>
+
+                <Modal.Body style={{ backgroundColor: 'black' , border:'1px solid white', borderRadius:'5px'  }}>
+                    {showLoginForm ? (
+                        // Formulário de login
+                        <div style={{
+                            padding: '40px',
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'black',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                            color: 'white',
+                            textAlign: 'center'
+                        }}>
+                            <h2 style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: '700',
+                                fontSize: '24px',
+                                marginBottom: '30px',
+                                color: 'white'
+                            }}>
+                                BEM VINDO DE VOLTA <BiLogoVuejs style={{ fontSize: '45px' }} />
+                            </h2>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="E-mail"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        marginBottom: '15px',
+                                        borderRadius: '5px',
+                                        border: '2px solid #333',
+                                        boxSizing: 'border-box',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                                <input
+                                    type="password"
+                                    value={senha}
+                                    onChange={(e) => setSenha(e.target.value)}
+                                    placeholder="Senha"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        marginBottom: '20px',
+                                        borderRadius: '5px',
+                                        border: '2px solid #333',
+                                        boxSizing: 'border-box',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ minHeight: '30px' }}>
+                                {mensagem && (
+                                    <p style={{
+                                        textAlign: 'center',
+                                        color: corMensagem,
+                                        marginTop: '15px',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {mensagem}
+                                    </p>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={loginCliente}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    transition: 'background-color 0.3s ease'
+                                }}
+                            >
+                                ENTRAR
+                            </button>
+
+                            <div style={{ marginTop: '20px' }}>
+                                <p style={{ fontSize: '14px', color: 'white' }}>
+                                    Não tem conta?
+                                    <Link href="/paginas/cadastros" style={{
+                                        color: '#28a745',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold'
+                                    }}> Cadastre-se
+                                    </Link>
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        // Exibe as opções de Login e Cadastro
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <button
+                                onClick={() => setShowLoginForm(true)}  // Exibe o formulário de login
+                                style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: 'bold',
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    padding: '10px 20px',
+                                    cursor: 'pointer',
+                                    width: '48%'
+                                }}
+                            >
+                                Login
+                            </button>
+                            <button
+                                style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: 'bold',
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    padding: '10px 20px',
+                                    cursor: 'pointer',
+                                    width: '48%'
+                                }}
+                                onClick={() => window.location.href = '/paginas/cadastros'}  // Redirecionando para a página de cadastro
+                            >
+                                Cadastrar-se
+                            </button>
+                        </div>
+                    )}
+                </Modal.Body>
+            </Modal>
+
+
 
         </Pagina2>
     );
