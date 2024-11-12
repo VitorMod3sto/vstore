@@ -264,7 +264,7 @@ export default function CarrinhoPage() {
                         <div style={{
                             padding: '40px',
                             width: '400px',
-                            margin: '50px auto', // Margem superior e inferior
+                            margin: '22px auto', // Margem superior e inferior
                             backgroundColor: 'black',
                             borderRadius: '8px',
                             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
@@ -493,7 +493,7 @@ export default function CarrinhoPage() {
                                 )}
                                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
                                     {carrinho.length > 0 ? (
-                                        <Link href="/paginas/carrinho">
+                                        <Link href="/paginas/checkout">
                                             <button
                                                 style={{
                                                     backgroundColor: '#28a745',

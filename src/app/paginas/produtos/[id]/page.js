@@ -220,6 +220,7 @@ export default function Page({ params }) {
         handleCloseModalLogin();
     };
 
+    
     if (loading) {
         return (
             <div style={{
@@ -254,8 +255,6 @@ export default function Page({ params }) {
             </div>
         );
     }
-
-
 
     return (
         <Pagina2 titulo="Detalhe do Produto">

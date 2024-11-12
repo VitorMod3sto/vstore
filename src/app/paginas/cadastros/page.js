@@ -129,10 +129,10 @@ export default function Cadastro() {
         };
 
         emailjs.send(
-            'service_7g3c2o9',  // ID do serviço de e-mail no EmailJS
-            'template_trbeuz6',  // ID do template no EmailJS
+            process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,  // Usando variáveis de ambiente
+            process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,  // Usando variáveis de ambiente
             templateParams,
-            'xKR_rB0N0cuJhv3fi' // Seu User ID do EmailJS
+            process.env.NEXT_PUBLIC_EMAILJS_USER_ID // Usando variáveis de ambiente
         )
             .then((response) => {
                 console.log('E-mail enviado com sucesso:', response);
