@@ -118,7 +118,37 @@ export default function Checkout() {
         setTotal(calcularTotal());
     }, [carrinho]);  // Sempre que o carrinho mudar, recalcular o total
 
+    // Função para aplicar o cupom
+    const aplicarCupom = () => {
+        if (cupom === "BVSTORE") {
+            // Desconto de 10% no subtotal
+            const subtotalComDesconto = (total * 0.9).toFixed(2);
+            setDesconto(10);  // Salva o valor do desconto (10%)
+            setMensagemCupom("Cupom aplicado com sucesso!");
+            setTotal(subtotalComDesconto);
+        } else {
+            setDesconto(0); // Se o cupom não for válido, nenhum desconto é aplicado
+            setMensagemCupom("Cupom inválido.");
+        }
+    };
+
+    // Alteração no cálculo do total, considerando o desconto
+    // Função para calcular o subtotal com desconto (aplicando 10% de desconto)
+    const calcularSubtotalComDesconto = () => {
+        const subtotal = carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
+        // Se o cupom de desconto estiver aplicado, aplica o desconto de 10% no subtotal
+        if (desconto > 0) {
+            return (subtotal * 0.9).toFixed(2);  // Aplica o desconto de 10%
+        }
+        return subtotal.toFixed(2);  // Se não houver desconto, retorna o subtotal normal
+    };
     
+
+
+    // Atualiza o estado do total
+    useEffect(() => {
+        setTotal(calcularSubtotalComDesconto());
+    }, [carrinho, desconto]); // Recalcula o total quando o carrinho ou o desconto mudarem
 
     return (
         <Pagina2 titulo="Checkout">
@@ -377,6 +407,13 @@ export default function Checkout() {
                                             </Col>
                                         </Row>
                                     </Form.Group>
+
+                                    {/* Mensagem do cupom */}
+                                    {mensagemCupom && (
+                                        <p style={{ color: desconto > 0 ? 'green' : 'red', fontWeight: 'bold' }}>
+                                            {mensagemCupom}
+                                        </p>
+                                    )}
                                 </Form>
                             )}
 
@@ -498,10 +535,10 @@ export default function Checkout() {
 
                     {/* Subtotal e Frete lado a lado, Total abaixo */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                        <p><strong>Subtotal:</strong> R$ {calcularTotal()}</p>
+                        <p><strong>Subtotal:</strong> R$ {calcularSubtotalComDesconto()}</p>
                         <p><strong>Frete:</strong> R$ 20,00</p>
                     </div>
-                    <p style={{ fontWeight: 'bold', textAlign: 'center' }}>Total: R$ {total}</p>
+                    <p style={{ fontWeight: 'bold', textAlign: 'center' }}>Total: R$  {calcularTotal()}</p>
 
                     {/* Botão "Ver Carrinho" fixado no fundo */}
                     <Link href="/paginas/carrinho">
