@@ -105,13 +105,64 @@ export default function Checkout() {
         setMostrarEndereco(false);
     };
 
-    // Função para calcular o total do carrinho com o frete
+    // Função para calcular o valor do frete
+    const calcularFrete = () => {
+        if (total >= 250) {
+            // Frete grátis se o valor do carrinho for superior a R$250,00
+            return 0;
+        }
+
+        // Lógica de frete baseada no estado (uf) do cliente
+        switch (uf) {
+            case 'AC':
+            case 'AP':
+            case 'AM':
+            case 'PA':
+            case 'RO':
+            case 'RR':
+            case 'TO':
+                return 20.00; // Região Norte
+
+            case 'PR':
+            case 'SC':
+            case 'RS':
+                return 30.00; // Região Sul
+
+            case 'GO':
+            case 'MT':
+            case 'MS':
+            case 'SP':
+            case 'RJ':
+            case 'ES':
+            case 'MG':
+            case 'DF':
+            case 'BA':
+            case 'SE':
+            case 'PI':
+            case 'PE':
+            case 'AL':
+            case 'RN':
+            case 'PB':
+            case 'CE':
+            case 'MA':
+            case 'PI':
+                return 20.00; // Região Centro-Oeste, Sudeste e Nordeste
+
+            default:
+                return 20.00; // Caso o estado não esteja listado, assume o valor de frete padrão de 20
+        }
+    };
+
+    // Função para calcular o total incluindo o frete
     const calcularTotal = () => {
         const totalCarrinho = carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
-        const frete = 20.00; // Defina o valor do frete fixo ou dinâmica
+        const frete = calcularFrete(); // Calcula o frete
         const totalComFrete = totalCarrinho + frete;
         return totalComFrete.toFixed(2); // Arredondando para duas casas decimais
     };
+
+
+
 
     // Atualizando o estado do total
     useEffect(() => {
@@ -150,6 +201,51 @@ export default function Checkout() {
         setTotal(calcularSubtotalComDesconto());
     }, [carrinho, desconto]); // Recalcula o total quando o carrinho ou o desconto mudarem
 
+
+    const finalizarPagamento = () => {
+        // Verifique se o cliente está logado
+        const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
+    
+        if (!clienteLogado) {
+            alert('Por favor, faça login para finalizar a compra.');
+            return;
+        }
+    
+        // Coletando os dados do pedido
+        const pedido = {
+            id: Date.now(), // Gerando um ID único para o pedido com base no timestamp
+            cliente: clienteLogado.email, // Associando o pedido ao e-mail do cliente
+            itens: carrinho.map(item => ({
+                nome: item.nome,
+                quantidade: item.quantidade,
+                preco: item.preco,
+                imagem: item.imagem
+            })),
+            total: calcularTotal(), // Total do pedido (incluindo frete e descontos)
+            metodoPagamento: formularioAtivo, // 'cartao' ou 'pix'
+            data: new Date().toLocaleString(), // Data de finalização do pedido
+        };
+    
+        // Recupera os pedidos do cliente no localStorage (se houver)
+        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+    
+        // Adiciona o novo pedido à lista de pedidos
+        pedidos.push(pedido);
+    
+        // Atualiza os pedidos no localStorage
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+    
+        // Atualiza o estado do cliente no localStorage, caso queira salvar mais informações
+        const clienteAtualizado = { ...clienteLogado, ultimoPedido: pedido.id };
+        localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
+    
+        // Exibir mensagem de sucesso
+        alert('Pedido finalizado com sucesso!');
+        
+        // Aqui você pode adicionar um redirecionamento ou outra ação após salvar o pedido
+        // Exemplo: window.location.href = '/confirmacao';
+    };
+    
     return (
         <Pagina2 titulo="Checkout">
             <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px', position: 'relative', border: '1px solid black', borderRadius: '10px' }}>
@@ -466,6 +562,7 @@ export default function Checkout() {
                                     fontWeight: 'bold',
                                     border: 'none',
                                 }}
+                                onClick={finalizarPagamento}
                             >
                                 Finalizar Pagamento
                             </Button>
@@ -535,16 +632,28 @@ export default function Checkout() {
 
                     {/* Subtotal e Frete lado a lado, Total abaixo */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                        <p>
-                            <strong>
-                                {desconto > 0 ? `Subtotal (desconto): ` : `Subtotal: `}
-                            </strong>
-                            R$ {calcularSubtotalComDesconto()}
+                        <p style={{ fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: desconto > 0 ? 'green' : 'white' }}>
+                                <strong>
+                                    {desconto > 0 ? `SUBTOTAL (-10%) : ` : `SUBTOTAL: `}
+                                </strong>
+                            </span>
+                            <span style={{ color: 'white', marginLeft:'5px' }}> R$ {calcularSubtotalComDesconto()}
+                            </span>
                         </p>
-                        <p><strong>Frete:</strong> R$ 20,00</p>
+
+
+
+                        <div style={{ fontSize: '16px' }}>
+                            {total >= 250 ? (
+                                <p style={{ color: 'green' }}><strong>FRETE GRÁTIS!</strong></p>
+                            ) : (
+                                <p><strong>FRETE:</strong> R$ {calcularFrete().toFixed(2)}</p>
+                            )}
+                        </div>
                     </div>
 
-                    <p style={{ fontWeight: 'bold', textAlign: 'center' }}>Total: R$  {calcularTotal()}</p>
+                    <p style={{ fontWeight: 'bold', textAlign: 'center' }}>TOTAL: R$  {calcularTotal()}</p>
 
                     {/* Botão "Ver Carrinho" fixado no fundo */}
                     <Link href="/paginas/carrinho">
@@ -569,7 +678,7 @@ export default function Checkout() {
 
             {/* Frete Grátis */}
             <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '18px' }}>
-                <p>APROVEITE FRETE GRÁTIS ACIMA DE R$200,00! <FaShippingFast style={{ fontSize: '25px', color: 'black' }} /></p>
+                <p>APROVEITE FRETE GRÁTIS ACIMA DE R$250,00! <FaShippingFast style={{ fontSize: '25px', color: 'black' }} /></p>
             </div>
         </Pagina2 >
     );

@@ -127,7 +127,7 @@ export default function Pagina2(props) {
                     fontWeight: "bold",
                 }}
             >
-                Frete grátis acima de R$200,00! <FaTruckFast style={{ fontSize: "20px", marginBottom: "02px" }} />
+                Frete grátis acima de R$250,00! <FaTruckFast style={{ fontSize: "20px", marginBottom: "02px" }} />
             </div>
 
             {/* CRIANDO MENU NAVBAR*/}

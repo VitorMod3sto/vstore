@@ -142,6 +142,7 @@ export default function Cadastro() {
             });
     };
 
+
     return (
         <Pagina2 titulo="Cadastro">
             <div style={{
@@ -390,68 +391,68 @@ export default function Cadastro() {
             </div>
 
             {mostrarModal && (
-    <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)', // Garantir que o modal fique centralizado
-        backgroundColor: 'black',  // Fundo preto
-        padding: '30px 40px',
-        borderRadius: '12px',
-        border: '2px solid #f0a500',  // Borda laranja
-        textAlign: 'center',
-        zIndex: '1000',
-        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
-        opacity: 1,
-        transition: 'opacity 1s ease-out',  // Fade-in suave
-        animation: 'fadeIn 1s ease-out',  // Animação de fade-in
-    }}>
-        <h1 style={{color: '#f0a500'}}>
-             <BiLogoVuejs style={{fontSize:'40px'}}/><GiPartyPopper style={{marginBottom:'10px', fontSize:'45px'}}/>
-        </h1>
-        <h2 style={{
-            color: '#f0a500',  // Texto laranja
-            fontSize: '24px',
-            fontWeight: '700',
-            marginBottom: '20px',
-            fontFamily: 'Montserrat, sans-serif',
-            textTransform: 'uppercase',
-        }}>
-           Bem-vindo à Vstore, {nome}! 
-        </h2>
-        <p style={{
-            color: 'white',  // Texto branco para contraste no fundo preto
-            fontSize: '18px',
-            fontWeight: '500',
-            lineHeight: '1.6',
-            marginBottom: '20px',
-        }}>
-            Você acaba de se juntar à nossa família ! <br />
-            Um e-mail de boas-vindas foi enviado para o seu endereço de e-mail e nele você encontrará uma surpresa especial! 🎁
-        </p>
-        <button
-            onClick={() => setMostrarModal(false)}
-            style={{
-                padding: '12px 20px',
-                backgroundColor: '#f0a500',  // Botão laranja
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                marginTop: '20px',
-                transition: 'background-color 0.3s',
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#f58d42'} // Hover color
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#f0a500'} // Hover color
-        >
-            Fechar
-        </button>
-    </div>
-)}
+                <div style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)', // Garantir que o modal fique centralizado
+                    backgroundColor: 'black',  // Fundo preto
+                    padding: '30px 40px',
+                    borderRadius: '12px',
+                    border: '2px solid #f0a500',  // Borda laranja
+                    textAlign: 'center',
+                    zIndex: '1000',
+                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                    opacity: 1,
+                    transition: 'opacity 1s ease-out',  // Fade-in suave
+                    animation: 'fadeIn 1s ease-out',  // Animação de fade-in
+                }}>
+                    <h1 style={{ color: '#f0a500' }}>
+                        <BiLogoVuejs style={{ fontSize: '40px' }} /><GiPartyPopper style={{ marginBottom: '10px', fontSize: '45px' }} />
+                    </h1>
+                    <h2 style={{
+                        color: '#f0a500',  // Texto laranja
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        marginBottom: '20px',
+                        fontFamily: 'Montserrat, sans-serif',
+                        textTransform: 'uppercase',
+                    }}>
+                        Bem-vindo à Vstore, {nome}!
+                    </h2>
+                    <p style={{
+                        color: 'white',  // Texto branco para contraste no fundo preto
+                        fontSize: '18px',
+                        fontWeight: '500',
+                        lineHeight: '1.6',
+                        marginBottom: '20px',
+                    }}>
+                        Você acaba de se juntar à nossa família ! <br />
+                        Um e-mail de boas-vindas foi enviado para o seu endereço de e-mail e nele você encontrará uma surpresa especial! 🎁
+                    </p>
+                    <button
+                        onClick={() => setMostrarModal(false)}
+                        style={{
+                            padding: '12px 20px',
+                            backgroundColor: '#f0a500',  // Botão laranja
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            marginTop: '20px',
+                            transition: 'background-color 0.3s',
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f58d42'} // Hover color
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#f0a500'} // Hover color
+                    >
+                        Fechar
+                    </button>
+                </div>
+            )}
 
-<style jsx>{`
+            <style jsx>{`
     @keyframes fadeIn {
         0% {
             opacity: 0;
