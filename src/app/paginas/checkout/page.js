@@ -142,7 +142,7 @@ export default function Checkout() {
         }
         return subtotal.toFixed(2);  // Se não houver desconto, retorna o subtotal normal
     };
-    
+
 
 
     // Atualiza o estado do total
@@ -535,9 +535,15 @@ export default function Checkout() {
 
                     {/* Subtotal e Frete lado a lado, Total abaixo */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                        <p><strong>Subtotal:</strong> R$ {calcularSubtotalComDesconto()}</p>
+                        <p>
+                            <strong>
+                                {desconto > 0 ? `Subtotal (desconto): ` : `Subtotal: `}
+                            </strong>
+                            R$ {calcularSubtotalComDesconto()}
+                        </p>
                         <p><strong>Frete:</strong> R$ 20,00</p>
                     </div>
+
                     <p style={{ fontWeight: 'bold', textAlign: 'center' }}>Total: R$  {calcularTotal()}</p>
 
                     {/* Botão "Ver Carrinho" fixado no fundo */}
