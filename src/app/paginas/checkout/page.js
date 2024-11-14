@@ -9,6 +9,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios'; // Certifique-se de instalar o axios ou use fetch
 import apiLocalidade from '@/services/apiLocalidade';
 import { buscarEnderecoPorCep } from '@/services/apiViaCep';
+import { BiLogoVuejs } from 'react-icons/bi';
+import { GiPartyPopper } from 'react-icons/gi';
 
 export default function Checkout() {
     const [carrinho, setCarrinho] = useState([]);
@@ -26,6 +28,10 @@ export default function Checkout() {
     const [cupom, setCupom] = useState(''); // Novo estado para o cupom
     const [desconto, setDesconto] = useState(0);
     const [mensagemCupom, setMensagemCupom] = useState('');
+    const [mostrarModalPG, setMostrarModalPG] = useState(false);
+    const [dadosPedido, setDadosPedido] = useState(null);
+
+
 
     useEffect(() => {
         apiLocalidade.get('estados?orderBy=nome').then(resultado => {
@@ -121,7 +127,7 @@ export default function Checkout() {
             case 'RO':
             case 'RR':
             case 'TO':
-                return 20.00; // Região Norte
+                return 30.00; // Região Norte
 
             case 'PR':
             case 'SC':
@@ -201,16 +207,21 @@ export default function Checkout() {
         setTotal(calcularSubtotalComDesconto());
     }, [carrinho, desconto]); // Recalcula o total quando o carrinho ou o desconto mudarem
 
+    const abrirModalPG = (pedido) => {
+        // Aqui você está passando o pedido para a modal
+        setDadosPedido(pedido); // Armazenando os dados do pedido no estado
+        setMostrarModalPG(true); // Exibindo a modal
+    };
 
     const finalizarPagamento = () => {
         // Verifique se o cliente está logado
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
-    
+
         if (!clienteLogado) {
             alert('Por favor, faça login para finalizar a compra.');
             return;
         }
-    
+
         // Coletando os dados do pedido
         const pedido = {
             id: Date.now(), // Gerando um ID único para o pedido com base no timestamp
@@ -221,31 +232,29 @@ export default function Checkout() {
                 preco: item.preco,
                 imagem: item.imagem
             })),
-            total: calcularTotal(), // Total do pedido (incluindo frete e descontos)
+            total: parseFloat(calcularTotal()), // Garantir que o total seja um número
             metodoPagamento: formularioAtivo, // 'cartao' ou 'pix'
             data: new Date().toLocaleString(), // Data de finalização do pedido
         };
-    
+
         // Recupera os pedidos do cliente no localStorage (se houver)
         const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-    
+
         // Adiciona o novo pedido à lista de pedidos
         pedidos.push(pedido);
-    
+
         // Atualiza os pedidos no localStorage
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
-    
+
         // Atualiza o estado do cliente no localStorage, caso queira salvar mais informações
         const clienteAtualizado = { ...clienteLogado, ultimoPedido: pedido.id };
         localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
-    
-        // Exibir mensagem de sucesso
-        alert('Pedido finalizado com sucesso!');
-        
-        // Aqui você pode adicionar um redirecionamento ou outra ação após salvar o pedido
-        // Exemplo: window.location.href = '/confirmacao';
+
+        // Agora chamamos a função que abre a modal com os dados do pedido
+        abrirModalPG(pedido);
     };
-    
+
+
     return (
         <Pagina2 titulo="Checkout">
             <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px', position: 'relative', border: '1px solid black', borderRadius: '10px' }}>
@@ -638,7 +647,7 @@ export default function Checkout() {
                                     {desconto > 0 ? `SUBTOTAL (-10%) : ` : `SUBTOTAL: `}
                                 </strong>
                             </span>
-                            <span style={{ color: 'white', marginLeft:'5px' }}> R$ {calcularSubtotalComDesconto()}
+                            <span style={{ color: 'white', marginLeft: '5px' }}> R$ {calcularSubtotalComDesconto()}
                             </span>
                         </p>
 
@@ -680,6 +689,159 @@ export default function Checkout() {
             <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '18px' }}>
                 <p>APROVEITE FRETE GRÁTIS ACIMA DE R$250,00! <FaShippingFast style={{ fontSize: '25px', color: 'black' }} /></p>
             </div>
+
+            {mostrarModalPG && (
+    <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#f5f5f5',
+        padding: '30px 40px',
+        borderRadius: '12px',
+        border: '3px solid black',
+        textAlign: 'center',
+        zIndex: '1000',
+        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+        opacity: 1,
+        transition: 'opacity 1s ease-out',
+        animation: 'fadeIn 1s ease-out',
+        width: '80%',
+        maxWidth: '500px',
+        height: '80%', // Definindo altura da modal
+        maxHeight: '600px', // Definindo altura máxima
+        overflowY: 'auto', // Habilitando rolagem vertical
+    }}>
+        <style>
+            {`
+                ::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+                ::-webkit-scrollbar-thumb {
+                    background-color: #888;
+                    border-radius: 10px;
+                }
+                ::-webkit-scrollbar-track {
+                    background: transparent;
+                    border-radius: 10px;
+                }
+            `}
+        </style>
+
+        <h2 style={{
+            color: '#333',
+            fontSize: '24px',
+            fontWeight: '700',
+            marginBottom: '20px',
+            fontFamily: 'Montserrat, sans-serif',
+            textTransform: 'uppercase',
+        }}>
+            Recibo de Compra
+        </h2>
+
+        <div style={{
+            backgroundColor: '#fff',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            marginBottom: '20px',
+            textAlign: 'left',
+        }}>
+            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Nome do Cliente:</strong> {dadosPedido.cliente}</p>
+            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>ID do Pedido:</strong> {dadosPedido.id}</p>
+            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Data:</strong> {dadosPedido.data}</p>
+        </div>
+
+        {/* Itens do Pedido */}
+        <div style={{
+            backgroundColor: '#fff',
+            padding: '15px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            marginBottom: '20px',
+            textAlign: 'left',
+        }}>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px' }}>Itens do Pedido:</h3>
+            {dadosPedido.itens.map((item, index) => (
+                <div key={index} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid #eee',
+                    padding: '10px 0',
+                }}>
+                    <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', marginRight: '10px', borderRadius: '5px' }} />
+                    <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '16px', margin: 0 }}><strong>{item.nome}</strong></p>
+                        <p style={{ fontSize: '14px', margin: '5px 0' }}>Quantidade: {item.quantidade}</p>
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>R$ {item.preco.toFixed(2)}</div>
+                </div>
+            ))}
+        </div>
+
+        {/* Subtotal, Desconto, Frete e Total */}
+        <div style={{
+            backgroundColor: '#fff',
+            padding: '15px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            marginBottom: '20px',
+            textAlign: 'left',
+        }}>
+            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Subtotal:</strong> R$ {Number(dadosPedido.total).toFixed(2)}</p>
+            {desconto > 0 && (
+                <p style={{ fontSize: '16px', marginBottom: '10px', color: 'green' }}><strong>Desconto (-{desconto}%):</strong> R$ {(dadosPedido.total * (desconto / 100)).toFixed(2)}</p>
+            )}
+            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Frete:</strong> R$ {calcularFrete().toFixed(2)}</p>
+            <p style={{
+                fontSize: '20px',   /* Aumentei o tamanho da fonte */
+                fontWeight: 'bold', /* Deixei em negrito */
+                marginBottom: '10px'
+            }}>
+                <strong>Total:</strong> R$ {calcularTotal()}
+            </p>
+        </div>
+
+        {/* Forma de Pagamento */}
+        <div style={{
+            backgroundColor: '#fff',
+            padding: '15px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            marginBottom: '20px',
+            textAlign: 'left',
+        }}>
+            <p style={{ fontSize: '16px' }}><strong>Forma de Pagamento:</strong> {formularioAtivo === 'cartao' ? 'Cartão de Crédito' : 'Pix'}</p>
+        </div>
+
+        {/* Botão de Fechar Modal */}
+        <button
+            onClick={() => setMostrarModalPG(false)}
+            style={{
+                padding: '12px 20px',
+                backgroundColor: '#f0a500',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s',
+                marginTop: '20px',
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#f58d42'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#f0a500'}
+        >
+            Fechar
+        </button>
+    </div>
+)}
+
+
+
+
         </Pagina2 >
     );
 }
