@@ -36,6 +36,9 @@ export default function Page({ params }) {
     const produtosPorGrupo = 8;
     // Definindo que devem ser exibidos 8 produtos no Carrossel na variável produtosPorGrupo
 
+    const [itensCarrinho, setItensCarrinho] = useState([]);  // Estado para armazenar os itens do carrinho
+
+
     useEffect(() => {
         // useEffect para carregar os produtos do localStorage ao montar o componente
         const produtos = JSON.parse(localStorage.getItem('produtos'));
@@ -365,7 +368,14 @@ export default function Page({ params }) {
 
 
 
-                            <button style={{
+                            <button
+                             onClick={() => {
+                                // Salvar o produto selecionado no localStorage
+                                localStorage.setItem('produtoSelecionado', JSON.stringify(produto));
+                                // Redirecionar para a página de checkout
+                                window.location.href = '/paginas/checkout/produto';
+                            }}
+                             style={{
                                 fontFamily: 'Montserrat, sans-serif',
                                 fontWeight: 'bold',
                                 backgroundColor: 'black',
@@ -570,33 +580,83 @@ export default function Page({ params }) {
             </Modal>
 
             {/* Modal de Resumo do Carrinho */}
-            <Modal show={exibirModalResumo} onHide={handleCloseModalResumo}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Resumo do Carrinho</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <h5>Itens no Carrinho:</h5>
-                    <ul style={{ listStyleType: 'none', padding: 0 }}>
-                        {carrinho.map(item => (
-                            <li key={item.id} style={{ marginBottom: '10px' }}>
-                                <img src={item.imagem} alt={item.nome} style={{ width: '50px', marginRight: '10px' }} />
-                                <span>{item.nome} - R$ {item.preco} (x{item.quantidade})</span>
-                            </li>
-                        ))}
-                    </ul>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModalResumo}>
-                        Fechar
-                    </Button>
-                    <Button variant="primary" onClick={() => setModalPagamento(true)}>
+            <Modal show={exibirModalResumo} onHide={handleCloseModalResumo} centered>
+                <Modal.Body style={{
+                    padding: '10px',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                    borderRadius: '8px',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                }}>
+                    <h5>Itens no Carrinho</h5>
+                    <hr style={{ border: '2px solid #ddd', marginBottom: '10px' }} />
+
+                    <div style={{
+                        flex: 1,
+                        overflowY: 'auto',  // Permitir scroll vertical nos itens
+                        maxHeight: '300px', // Limitar altura dos itens
+                        marginBottom: '10px',
+                    }}>
+                        {carrinho.length === 0 ? (
+                            <p>Seu carrinho está vazio.</p>
+                        ) : (
+                            carrinho.map((item) => (
+                                <div
+                                    key={item.id}
+                                    style={{
+                                        marginBottom: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        borderBottom: '1px solid #ddd',
+                                        paddingBottom: '10px',
+                                        paddingTop: '10px',
+                                    }}
+                                >
+                                    <img
+                                        src={item.imagem}
+                                        alt={item.nome}
+                                        style={{
+                                            width: '50px',
+                                            height: '50px',
+                                            marginRight: '10px',
+                                        }}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                                            {item.nome}
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: 'gray' }}>
+                                            Quantidade: {item.quantidade}
+                                        </div>
+                                    </div>
+                                    <div style={{ fontWeight: 'bold', marginLeft: '20px' }}>
+                                        R$ {item.preco.toFixed(2)}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        <Link href={`/paginas/checkout`}>
+                    <Button
+                        variant="primary"
+                        style={{
+                            backgroundColor: 'black',
+                            color: 'white',
+                            border: 'none',
+                            width: '100%',
+                        }}
+                    >
                         Finalizar Compra
                     </Button>
-                </Modal.Footer>
+                    </Link>
+                    </div>
+                    
+                </Modal.Body>
             </Modal>
 
 
-            <Modal style={{ marginTop: '100px'}} show={showModalLogin} onHide={handleCloseModalLogin}>
+
+            <Modal style={{ marginTop: '100px' }} show={showModalLogin} onHide={handleCloseModalLogin}>
                 {/* Exibe somente o título quando showLoginForm for falso */}
                 {!showLoginForm && (
                     <Modal.Header style={{
@@ -607,7 +667,7 @@ export default function Page({ params }) {
                         color: '#343a40',  // Cor do texto escura para contraste
                         fontFamily: 'Montserrat, sans-serif',  // Fonte moderna
                         fontWeight: '600',
-                        border:'1px solid white' 
+                        border: '1px solid white'
                     }}>
                         <Modal.Title style={{
                             fontSize: '24px',
@@ -630,7 +690,7 @@ export default function Page({ params }) {
 
                 )}
 
-                <Modal.Body style={{ backgroundColor: 'black' , border:'1px solid white', borderRadius:'5px'  }}>
+                <Modal.Body style={{ backgroundColor: 'black', border: '1px solid white', borderRadius: '5px' }}>
                     {showLoginForm ? (
                         // Formulário de login
                         <div style={{
@@ -769,8 +829,6 @@ export default function Page({ params }) {
                     )}
                 </Modal.Body>
             </Modal>
-
-
 
         </Pagina2>
     );

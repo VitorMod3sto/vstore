@@ -6,33 +6,27 @@ import { Button, Col, Form, Row } from 'react-bootstrap';
 import { FaShippingFast } from 'react-icons/fa';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
-import axios from 'axios'; // Certifique-se de instalar o axios ou use fetch
 import apiLocalidade from '@/services/apiLocalidade';
 import { buscarEnderecoPorCep } from '@/services/apiViaCep';
-import { BiLogoVuejs } from 'react-icons/bi';
-import { GiPartyPopper } from 'react-icons/gi';
-
 
 export default function Checkout() {
-    const [carrinho, setCarrinho] = useState([]);
+    const [produtoSelecionado, setProdutoSelecionado] = useState(null);
     const [total, setTotal] = useState(0);
     const [formularioAtivo, setFormularioAtivo] = useState('Cartão');
-    const [mostrarEndereco, setMostrarEndereco] = useState(true); // Controle para mostrar o formulário de endereço
+    const [mostrarEndereco, setMostrarEndereco] = useState(true);
     const [cep, setCep] = useState('');
     const [endereco, setEndereco] = useState('');
     const [bairro, setBairro] = useState('');
     const [numero, setNumero] = useState('');
     const [uf, setUf] = useState('');
     const [cidade, setCidade] = useState('');
-    const [ufs, setUfs] = useState([]); // Estado para armazenar as UFs
-    const [cidades, setCidades] = useState([]); // Estado para armazenar as cidades
-    const [cupom, setCupom] = useState(''); // Novo estado para o cupom
+    const [ufs, setUfs] = useState([]);
+    const [cidades, setCidades] = useState([]);
+    const [cupom, setCupom] = useState('');
     const [desconto, setDesconto] = useState(0);
     const [mensagemCupom, setMensagemCupom] = useState('');
     const [mostrarModalPG, setMostrarModalPG] = useState(false);
     const [dadosPedido, setDadosPedido] = useState(null);
-
-
 
     useEffect(() => {
         apiLocalidade.get('estados?orderBy=nome').then(resultado => {
@@ -64,207 +58,124 @@ export default function Checkout() {
         }
     }, [uf]);
 
-    // Carregar o carrinho e os dados do cliente do localStorage
     useEffect(() => {
-        const carrinhoStorage = JSON.parse(localStorage.getItem('carrinhos')) || [];
+        const produto = JSON.parse(localStorage.getItem('produtoSelecionado'));
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
 
-        if (clienteLogado) {
-            const carrinhoCliente = carrinhoStorage.find(c => c.email === clienteLogado.email);
-            if (carrinhoCliente) {
-                setCarrinho(carrinhoCliente.itens);
-            }
+        if (produto) {
+            setProdutoSelecionado(produto);
+            setTotal(produto.preco);
+        }
 
-            // Carregar dados de endereço salvo
-            const enderecoCliente = clienteLogado.endereco;
-            if (enderecoCliente) {
-                setEndereco(enderecoCliente);
-                setBairro(clienteLogado.bairro);
-                setNumero(clienteLogado.numero);
-                setCep(clienteLogado.cep);
-                setUf(clienteLogado.uf);
-                setCidade(clienteLogado.cidade);
-            }
+        if (clienteLogado) {
+            setEndereco(clienteLogado.endereco || '');
+            setBairro(clienteLogado.bairro || '');
+            setNumero(clienteLogado.numero || '');
+            setCep(clienteLogado.cep || '');
+            setUf(clienteLogado.uf || '');
+            setCidade(clienteLogado.cidade || '');
         }
     }, []);
 
-
-
-    // Função para avançar para o pagamento
     const avancarParaPagamento = () => {
         if (!endereco || !bairro || !numero || !cep || !cidade || !uf) {
             alert("Por favor, preencha todos os campos de endereço.");
             return;
         }
 
-        // Atualiza o estado do endereço no localStorage
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
-        clienteLogado.endereco = endereco;
-        clienteLogado.bairro = bairro;
-        clienteLogado.numero = numero;
-        clienteLogado.cep = cep;
-        clienteLogado.uf = uf;
-        clienteLogado.cidade = cidade;
+        const clienteAtualizado = {
+            ...clienteLogado,
+            endereco,
+            bairro,
+            numero,
+            cep,
+            uf,
+            cidade,
+        };
 
-        localStorage.setItem('clienteLogado', JSON.stringify(clienteLogado));
-
-        // Depois de preencher o endereço, mostramos as opções de pagamento
+        localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
         setMostrarEndereco(false);
     };
 
-    // Função para calcular o valor do frete
     const calcularFrete = () => {
         if (total >= 250) {
-            // Frete grátis se o valor do carrinho for superior a R$250,00
             return 0;
         }
+        return 20;
+    };
 
-        // Lógica de frete baseada no estado (uf) do cliente
-        switch (uf) {
-            case 'AC':
-            case 'AP':
-            case 'AM':
-            case 'PA':
-            case 'RO':
-            case 'RR':
-            case 'TO':
-                return 30.00; // Região Norte
+    const calcularTotalComFrete = () => {
+        const frete = calcularFrete();
+        const descontoValor = desconto > 0 ? (produtoSelecionado.preco * desconto) / 100 : 0;
+        return (produtoSelecionado.preco - descontoValor + frete).toFixed(2);
+    };
 
-            case 'PR':
-            case 'SC':
-            case 'RS':
-                return 30.00; // Região Sul
-
-            case 'GO':
-            case 'MT':
-            case 'MS':
-            case 'SP':
-            case 'RJ':
-            case 'ES':
-            case 'MG':
-            case 'DF':
-            case 'BA':
-            case 'SE':
-            case 'PI':
-            case 'PE':
-            case 'AL':
-            case 'RN':
-            case 'PB':
-            case 'CE':
-            case 'MA':
-            case 'PI':
-                return 20.00; // Região Centro-Oeste, Sudeste e Nordeste
-
-            default:
-                return 20.00; // Caso o estado não esteja listado, assume o valor de frete padrão de 20
+    const calcularSubtotalComDesconto = () => {
+        if (produtoSelecionado) {
+            const descontoValor = desconto > 0 ? (produtoSelecionado.preco * desconto) / 100 : 0;
+            return (produtoSelecionado.preco - descontoValor).toFixed(2);
         }
+        return "0.00";
     };
 
-    // Função para calcular o total incluindo o frete
     const calcularTotal = () => {
-        const totalCarrinho = carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
-        const frete = calcularFrete(); // Calcula o frete
-        const totalComFrete = totalCarrinho + frete;
-        return totalComFrete.toFixed(2); // Arredondando para duas casas decimais
+        if (produtoSelecionado) {
+            const subtotalComDesconto = parseFloat(calcularSubtotalComDesconto());
+            const frete = calcularFrete();
+            return (subtotalComDesconto + frete).toFixed(2);
+        }
+        return "0.00";
     };
+    
 
-
-
-
-    // Atualizando o estado do total
-    useEffect(() => {
-        setTotal(calcularTotal());
-    }, [carrinho]);  // Sempre que o carrinho mudar, recalcular o total
-
-    // Função para aplicar o cupom
     const aplicarCupom = () => {
         if (cupom === "BVSTORE") {
-            // Desconto de 10% no subtotal
-            const subtotalComDesconto = (total * 0.9).toFixed(2);
-            setDesconto(10);  // Salva o valor do desconto (10%)
+            setDesconto(10);
             setMensagemCupom("Cupom aplicado com sucesso!");
-            setTotal(subtotalComDesconto);
         } else {
-            setDesconto(0); // Se o cupom não for válido, nenhum desconto é aplicado
+            setDesconto(0);
             setMensagemCupom("Cupom inválido.");
         }
     };
 
-    // Alteração no cálculo do total, considerando o desconto
-    // Função para calcular o subtotal com desconto (aplicando 10% de desconto)
-    const calcularSubtotalComDesconto = () => {
-        const subtotal = carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
-        // Se o cupom de desconto estiver aplicado, aplica o desconto de 10% no subtotal
-        if (desconto > 0) {
-            return (subtotal * 0.9).toFixed(2);  // Aplica o desconto de 10%
-        }
-        return subtotal.toFixed(2);  // Se não houver desconto, retorna o subtotal normal
-    };
-
-
-
-    // Atualiza o estado do total
-    useEffect(() => {
-        setTotal(calcularSubtotalComDesconto());
-    }, [carrinho, desconto]); // Recalcula o total quando o carrinho ou o desconto mudarem
-
-    const abrirModalPG = (pedido) => {
-        // Aqui você está passando o pedido para a modal
-        setDadosPedido(pedido); // Armazenando os dados do pedido no estado
-        setMostrarModalPG(true); // Exibindo a modal
-    };
-
     const finalizarPagamento = () => {
-        // Verifique se o cliente está logado
         const clienteLogado = JSON.parse(localStorage.getItem('clienteLogado'));
-
+    
         if (!clienteLogado) {
             alert('Por favor, faça login para finalizar a compra.');
             return;
         }
-
-        // Coletando os dados do pedido
-        const pedido = {
-            id: Date.now(), // Gerando um ID único para o pedido com base no timestamp
-            cliente: clienteLogado.email, // Associando o pedido ao e-mail do cliente
-            itens: carrinho.map(item => ({
-                nome: item.nome,
-                quantidade: item.quantidade,
-                preco: item.preco,
-                imagem: item.imagem
-            })),
-            total: parseFloat(calcularTotal()), // Garantir que o total seja um número
-            metodoPagamento: formularioAtivo, // 'cartao' ou 'pix'
-            data: new Date().toLocaleString(), // Data de finalização do pedido
-        };
-
-        // Recupera os pedidos do cliente no localStorage (se houver)
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-
-        // Adiciona o novo pedido à lista de pedidos
-        pedidos.push(pedido);
-
-        // Atualiza os pedidos no localStorage
-        localStorage.setItem('pedidos', JSON.stringify(pedidos));
-
-        // Atualiza o estado do cliente no localStorage, caso queira salvar mais informações
-        const clienteAtualizado = { ...clienteLogado, ultimoPedido: pedido.id };
-        localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
-
-        // Agora chamamos a função que abre a modal com os dados do pedido
-        abrirModalPG(pedido);
-    };
-
-
-    // Função para limpar o carrinho
-    const limparCarrinho = () => {
-        setCarrinho([]); // Limpa o carrinho
-        setMostrarModalPG(false); // Fecha a modal
-    };
-
     
+        const pedidoProduto = { // Alterado para "pedidoProduto"
+            id: Date.now(),
+            cliente: clienteLogado.email,
+            produto: produtoSelecionado,
+            total: parseFloat(calcularTotalComFrete()),
+            metodoPagamento: formularioAtivo,
+            data: new Date().toLocaleString(),
+        };
+    
+        const pedidosProdutos = JSON.parse(localStorage.getItem('pedidosProdutos')) || []; // Alterado para "pedidosProdutos"
+        pedidosProdutos.push(pedidoProduto); // Alterado para "pedidoProduto"
+        localStorage.setItem('pedidosProdutos', JSON.stringify(pedidosProdutos)); // Alterado para "pedidosProdutos"
+    
+        const clienteAtualizado = { ...clienteLogado, ultimoPedido: pedidoProduto.id };
+        localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
+    
+        setDadosPedido(pedidoProduto); // Alterado para "pedidoProduto"
+        setMostrarModalPG(true);
+    };
+    
+
+    const limparProdutoSelecionado = () => {
+        setProdutoSelecionado(null);
+        setMostrarModalPG(false);
+    };
+
     return (
         <Pagina2 titulo="Checkout">
+            
             <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px', position: 'relative', border: '1px solid black', borderRadius: '10px' }}>
                 {/* Lado esquerdo - Endereço de Entrega ou Opções de Pagamento */}
                 <div style={{
@@ -392,12 +303,10 @@ export default function Checkout() {
                                     }}
                                 />
 
-
                                 {/* Exibir o valor do frete */}
                                 <div style={{ fontSize: '16px', marginTop: '10px' }}>
-                                    <p><strong>FRETE:</strong> R$ 20,00</p>
+                                    <p><strong>FRETE:</strong> R$ {calcularFrete().toFixed(2)}</p>
                                 </div>
-
                             </div>
 
                             {/* Botão de avançar para pagamento */}
@@ -416,23 +325,20 @@ export default function Checkout() {
                             >
                                 Avançar para Pagamento
                             </Button>
-
                         </>
                     ) : (
                         /* Lado esquerdo - Opções de Pagamento */
                         <>
-
-
                             {/* Botões para alternar entre Cartão de Crédito e Pix */}
                             <div style={{ marginBottom: '10px' }}>
                                 <Button
                                     variant={formularioAtivo === 'Cartão' ? 'primary' : 'outline-primary'}
                                     style={{
                                         marginRight: '10px',
-                                        backgroundColor: formularioAtivo === 'Cartão' ? 'black' : 'white', // Fundo preto se ativo, branco se não
-                                        color: formularioAtivo === 'Cartão' ? 'white' : 'black', // Texto branco se ativo, preto se não
+                                        backgroundColor: formularioAtivo === 'Cartão' ? 'black' : 'white',
+                                        color: formularioAtivo === 'Cartão' ? 'white' : 'black',
                                         fontWeight: 'bold',
-                                        border: formularioAtivo === 'Cartão' ? 'none' : '1px solid black' // Remover borda se ativo, adicionar borda se não
+                                        border: formularioAtivo === 'Cartão' ? 'none' : '1px solid black'
                                     }}
                                     onClick={() => setFormularioAtivo('Cartão')}
                                 >
@@ -440,9 +346,9 @@ export default function Checkout() {
                                 </Button>
                                 <Button
                                     style={{
-                                        backgroundColor: formularioAtivo === 'Pix' ? 'black' : 'white', // Fundo preto se ativo, branco se não
-                                        color: formularioAtivo === 'Pix' ? 'white' : 'black', // Texto branco se ativo, preto se não
-                                        border: formularioAtivo === 'Pix' ? 'none' : '1px solid black', // Remover borda se ativo, adicionar borda se não
+                                        backgroundColor: formularioAtivo === 'Pix' ? 'black' : 'white',
+                                        color: formularioAtivo === 'Pix' ? 'white' : 'black',
+                                        border: formularioAtivo === 'Pix' ? 'none' : '1px solid black',
                                         fontWeight: 'bold'
                                     }}
                                     variant={formularioAtivo === 'Pix' ? 'primary' : 'outline-primary'}
@@ -460,7 +366,7 @@ export default function Checkout() {
                                         <Form.Control
                                             type="text"
                                             placeholder="Digite o número do cartão"
-                                            style={{ border: '1px solid black' }} // Borda fina preta
+                                            style={{ border: '1px solid black' }}
                                         />
                                     </Form.Group>
 
@@ -469,7 +375,7 @@ export default function Checkout() {
                                         <Form.Control
                                             type="text"
                                             placeholder="Digite o nome no cartão"
-                                            style={{ border: '1px solid black' }} // Borda fina preta
+                                            style={{ border: '1px solid black' }}
                                         />
                                     </Form.Group>
 
@@ -478,7 +384,7 @@ export default function Checkout() {
                                         <Form.Control
                                             type="text"
                                             placeholder="MM/AAAA"
-                                            style={{ border: '1px solid black' }} // Borda fina preta
+                                            style={{ border: '1px solid black' }}
                                         />
                                     </Form.Group>
 
@@ -487,7 +393,7 @@ export default function Checkout() {
                                         <Form.Control
                                             type="text"
                                             placeholder="XXX"
-                                            style={{ border: '1px solid black' }} // Borda fina preta
+                                            style={{ border: '1px solid black' }}
                                         />
                                     </Form.Group>
 
@@ -501,7 +407,7 @@ export default function Checkout() {
                                                     value={cupom}
                                                     onChange={(e) => setCupom(e.target.value)}
                                                     placeholder="Digite seu cupom de desconto"
-                                                    style={{ border: '1px solid black' }} // Borda fina preta
+                                                    style={{ border: '1px solid black' }}
                                                 />
                                             </Col>
                                             <Col xs={3}>
@@ -510,7 +416,7 @@ export default function Checkout() {
                                                         width: '100%',
                                                         backgroundColor: 'black',
                                                         color: 'white',
-                                                        border: '1px solid black', // Borda preta fina no botão
+                                                        border: '1px solid black',
                                                         fontWeight: 'bold'
                                                     }}
                                                     onClick={() => aplicarCupom()}
@@ -546,7 +452,7 @@ export default function Checkout() {
                                                     value={cupom}
                                                     onChange={(e) => setCupom(e.target.value)}
                                                     placeholder="Digite seu cupom de desconto"
-                                                    style={{ border: '1px solid black' }} // Borda fina preta
+                                                    style={{ border: '1px solid black' }}
                                                 />
                                             </Col>
                                             <Col xs={3}>
@@ -555,7 +461,7 @@ export default function Checkout() {
                                                         width: '100%',
                                                         backgroundColor: 'black',
                                                         color: 'white',
-                                                        border: '1px solid black', // Borda preta fina no botão
+                                                        border: '1px solid black',
                                                         fontWeight: 'bold'
                                                     }}
                                                     onClick={() => aplicarCupom()}
@@ -588,6 +494,7 @@ export default function Checkout() {
                     )}
                 </div>
 
+                {/* Resumo do Produto */}
                 <div style={{
                     width: '35%',
                     margin: '05px',
@@ -598,11 +505,11 @@ export default function Checkout() {
                     color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
-                    height: '600px', // A altura da div
-                    position: 'relative', // Tornando a div o contexto para o botão
+                    height: '600px',
+                    position: 'relative',
                     overflow: 'auto',
                 }}>
-                    <h4>Resumo do Carrinho</h4>
+                    <h4>Resumo do Produto</h4>
                     <hr />
                     <div style={{
                         flex: 1,
@@ -613,37 +520,35 @@ export default function Checkout() {
                         scrollbarWidth: 'thin',
                         scrollbarColor: 'white black'
                     }}>
-                        {carrinho.length === 0 ? (
-                            <p>Seu carrinho está vazio.</p>
+                        {!produtoSelecionado ? (
+                            <p>Nenhum produto selecionado.</p>
                         ) : (
-                            carrinho.map((item) => (
-                                <div key={item.id} style={{
-                                    marginBottom: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    borderBottom: '1px solid #ddd',
-                                    paddingBottom: '10px',
-                                    paddingTop: '10px',
-                                    backgroundColor: 'white',
-                                    color: 'black',
-                                    borderRadius: '8px',
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}>
-                                    <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', marginRight: '10px' }} />
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-                                            {item.nome}
-                                        </div>
-                                        <div style={{ fontSize: '12px', color: 'gray' }}>
-                                            Quantidade: {item.quantidade}
-                                        </div>
+                            <div style={{
+                                marginBottom: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                borderBottom: '1px solid #ddd',
+                                paddingBottom: '10px',
+                                paddingTop: '10px',
+                                backgroundColor: 'white',
+                                color: 'black',
+                                borderRadius: '8px',
+                                paddingLeft: '10px',
+                                paddingRight: '10px'
+                            }}>
+                                <img src={produtoSelecionado.imagem} alt={produtoSelecionado.nome} style={{ width: '50px', height: '50px', marginRight: '10px' }} />
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                                        {produtoSelecionado.nome}
                                     </div>
-                                    <div style={{ fontWeight: 'bold', marginLeft: '20px' }}>
-                                        R$ {item.preco.toFixed(2)}
+                                    <div style={{ fontSize: '12px', color: 'gray' }}>
+                                        Quantidade: 1
                                     </div>
                                 </div>
-                            ))
+                                <div style={{ fontWeight: 'bold', marginLeft: '20px' }}>
+                                    R$ {produtoSelecionado.preco.toFixed(2)}
+                                </div>
+                            </div>
                         )}
                     </div>
 
@@ -658,9 +563,6 @@ export default function Checkout() {
                             <span style={{ color: 'white', marginLeft: '5px' }}> R$ {calcularSubtotalComDesconto()}
                             </span>
                         </p>
-
-
-
                         <div style={{ fontSize: '16px' }}>
                             {total >= 250 ? (
                                 <p style={{ color: 'green' }}><strong>FRETE GRÁTIS!</strong></p>
@@ -672,12 +574,12 @@ export default function Checkout() {
 
                     <p style={{ fontWeight: 'bold', textAlign: 'center' }}>TOTAL: R$  {calcularTotal()}</p>
 
-                    {/* Botão "Ver Carrinho" fixado no fundo */}
-                    <Link href="/paginas/carrinho">
+                    {/* Botão "Ver Produto" fixado no fundo */}
+                    <Link href="/paginas/produto">
                         <Button
                             style={{
                                 position: 'absolute',
-                                bottom: '20px', // Distância do fundo da div
+                                bottom: '20px',
                                 left: '20px',
                                 right: '20px',
                                 backgroundColor: 'white',
@@ -686,42 +588,42 @@ export default function Checkout() {
                                 border: 'none',
                             }}
                         >
-                            Ver Carrinho
+                            Ver Produto
                         </Button>
                     </Link>
                 </div>
+                </div>
 
-            </div>
-
-            {/* Frete Grátis */}
+               {/* Frete Grátis */}
             <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '18px' }}>
                 <p>APROVEITE FRETE GRÁTIS ACIMA DE R$250,00! <FaShippingFast style={{ fontSize: '25px', color: 'black' }} /></p>
             </div>
 
-            {mostrarModalPG && (
-                <div style={{
-                    position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    backgroundColor: '#f5f5f5',
-                    padding: '30px 40px',
-                    borderRadius: '12px',
-                    border: '3px solid black',
-                    textAlign: 'center',
-                    zIndex: '1000',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
-                    opacity: 1,
-                    transition: 'opacity 1s ease-out',
-                    animation: 'fadeIn 1s ease-out',
-                    width: '80%',
-                    maxWidth: '500px',
-                    height: '80%', // Definindo altura da modal
-                    maxHeight: '600px', // Definindo altura máxima
-                    overflowY: 'auto', // Habilitando rolagem vertical
-                }}>
-                    <style>
-                        {`
+                {/* Modal de Confirmação */}
+                {mostrarModalPG && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        backgroundColor: '#f5f5f5',
+                        padding: '30px 40px',
+                        borderRadius: '12px',
+                        border: '3px solid black',
+                        textAlign: 'center',
+                        zIndex: '1000',
+                        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+                        opacity: 1,
+                        transition: 'opacity 1s ease-out',
+                        animation: 'fadeIn 1s ease-out',
+                        width: '80%',
+                        maxWidth: '500px',
+                        height: '80%',
+                        maxHeight: '600px',
+                        overflowY: 'auto',
+                    }}>
+                        <style>
+                            {`
                 ::-webkit-scrollbar {
                     width: 8px;
                     height: 8px;
@@ -734,152 +636,147 @@ export default function Checkout() {
                     background: transparent;
                     border-radius: 10px;
                 }
-
-                /* Animação da bolinha pulsante */
-                @keyframes pulsar {
-                    0% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(1.2); opacity: 0.7; }
-                    100% { transform: scale(1); opacity: 1; }
-                }
-                
-                .bolinha-verde {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    background-color: #4CAF50;
-                    animation: pulsar 1.5s infinite;
-                    margin-right: 10px;
-                }
             `}
-                    </style>
+                        </style>
 
-                    <h2 style={{
-                        color: '#333',
-                        fontSize: '24px',
-                        fontWeight: '700',
-                        marginBottom: '20px',
-                        fontFamily: 'Montserrat, sans-serif',
-                        textTransform: 'uppercase',
-                    }}>
-                        Recibo de Compra
-                    </h2>
-
-                    <div style={{
-                        backgroundColor: '#fff',
-                        padding: '20px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '20px',
-                        textAlign: 'left',
-                    }}>
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Cliente:</strong> {dadosPedido.cliente}</p>
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>ID do Pedido:</strong> {dadosPedido.id}</p>
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Data:</strong> {dadosPedido.data}</p>
-                    </div>
-
-                    {/* Status */}
-                    <div style={{
-                        backgroundColor: '#fff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '20px',
-                        textAlign: 'left',
-                    }}>
-                        <p style={{ fontSize: '16px', marginBottom: '0', display: 'flex', alignItems: 'center' }}>
-                            <span className="bolinha-verde"></span>
-                            <strong style={{ marginRight: '05px' }}>Status:  </strong> Aguardando para envio
-                        </p>
-                    </div>
-
-                    {/* Itens do Pedido */}
-                    <div style={{
-                        backgroundColor: '#fff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '20px',
-                        textAlign: 'left',
-                    }}>
-                        <h3 style={{ fontSize: '20px', fontWeight: '900', marginBottom: '10px' }}>Itens do Pedido:</h3>
-                        {dadosPedido.itens.map((item, index) => (
-                            <div key={index} style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                borderBottom: '1px solid #eee',
-                                padding: '10px 0',
-                            }}>
-                                <img src={item.imagem} alt={item.nome} style={{ width: '50px', height: '50px', marginRight: '10px', borderRadius: '5px' }} />
-                                <div style={{ flex: 1 }}>
-                                    <p style={{ fontSize: '16px', margin: 0 }}><strong>{item.nome}</strong></p>
-                                    <p style={{ fontSize: '14px', margin: '5px 0' }}>Quantidade: {item.quantidade}</p>
-                                </div>
-                                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>R$ {item.preco.toFixed(2)}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Subtotal, Desconto, Frete e Total */}
-                    <div style={{
-                        backgroundColor: '#fff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '20px',
-                        textAlign: 'left',
-                    }}>
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Subtotal:</strong> R$ {Number(dadosPedido.total).toFixed(2)}</p>
-                        {desconto > 0 && (
-                            <p style={{ fontSize: '16px', marginBottom: '10px', color: 'green' }}><strong>Desconto (-{desconto}%):</strong> R$ {(dadosPedido.total * (desconto / 100)).toFixed(2)}</p>
-                        )}
-                        <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Frete:</strong> R$ {calcularFrete().toFixed(2)}</p>
-                        <p style={{
-                            fontSize: '20px',   /* Aumentei o tamanho da fonte */
-                            fontWeight: 'bold', /* Deixei em negrito */
-                            marginBottom: '10px'
+                        <h2 style={{
+                            color: '#333',
+                            fontSize: '24px',
+                            fontWeight: '700',
+                            marginBottom: '20px',
+                            fontFamily: 'Montserrat, sans-serif',
+                            textTransform: 'uppercase',
                         }}>
-                            <strong>Total:</strong> R$ {calcularTotal()}
-                        </p>
-                    </div>
+                            Recibo de Compra
+                        </h2>
 
-                    {/* Forma de Pagamento */}
-                    <div style={{
-                        backgroundColor: '#fff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '0',
-                        textAlign: 'left',
-                    }}>
-                        <p style={{ fontSize: '16px', marginBottom: '0' }}><strong>Forma de Pagamento:</strong> {formularioAtivo === 'Cartão' ? 'Cartão de Crédito' : 'Pix'}</p>
-                    </div>
+                        <div style={{
+                            backgroundColor: '#fff',
+                            padding: '20px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            marginBottom: '20px',
+                            textAlign: 'left',
+                        }}>
+                            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Cliente:</strong> {dadosPedido.cliente}</p>
+                            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>ID do Pedido:</strong> {dadosPedido.id}</p>
+                            <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Data:</strong> {dadosPedido.data}</p>
+                        </div>
 
-                    {/* Botão de Fechar Modal */}
-                    <Link href={`/paginas/home`}>
-                        <button
-                            onClick={() => setMostrarModalPG(false)}
-                            style={{
-                                padding: '12px 20px',
-                                backgroundColor: 'black',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                fontSize: '16px',
+                        {/* Status */}
+                        <div style={{
+                            backgroundColor: '#fff',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            marginBottom: '20px',
+                            textAlign: 'left',
+                        }}>
+                            <p style={{ fontSize: '16px', marginBottom: '0', display: 'flex', alignItems: 'center' }}>
+                                <span className="bolinha-verde"></span>
+                                <strong style={{ marginRight: '05px' }}>Status:  </strong> Aguardando envio
+                            </p>
+                        </div>
+
+
+                        {/* Itens do Pedido */}
+                        <div style={{
+                            backgroundColor: '#fff',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            marginBottom: '20px',
+                            textAlign: 'left',
+                        }}>
+                            <h3 style={{ fontSize: '20px', fontWeight: '900', marginBottom: '10px' }}>Itens do Pedido:</h3>
+                            {produtoSelecionado ? (
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderBottom: '1px solid #eee',
+                                    padding: '10px 0',
+                                }}>
+                                    <img src={produtoSelecionado.imagem} alt={produtoSelecionado.nome} style={{ width: '50px', height: '50px', marginRight: '10px', borderRadius: '5px' }} />
+                                    <div style={{ flex: 1 }}>
+                                        <p style={{ fontSize: '16px', margin: 0 }}><strong>{produtoSelecionado.nome}</strong></p>
+                                        <p style={{ fontSize: '14px', margin: '5px 0' }}>Quantidade: 1</p>
+                                    </div>
+                                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>R$ {produtoSelecionado.preco.toFixed(2)}</div>
+                                </div>
+                            ) : (
+                                <p>Nenhum produto selecionado.</p>
+                            )}
+                        </div>
+
+                        {/* Subtotal, Desconto, Frete e Total */}
+                        <div style={{
+                            backgroundColor: '#fff',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            marginBottom: '20px',
+                            textAlign: 'left',
+                        }}>
+                            <p style={{ fontSize: '16px', marginBottom: '10px' }}>
+                                <strong>Subtotal:</strong> R$ {produtoSelecionado ? produtoSelecionado.preco.toFixed(2) : '0.00'}
+                            </p>
+                            {desconto > 0 && (
+                                <p style={{ fontSize: '16px', marginBottom: '10px', color: 'green' }}>
+                                    <strong>Desconto (-{desconto}%):</strong> R$ {(produtoSelecionado.preco * (desconto / 100)).toFixed(2)}
+                                </p>
+                            )}
+                            <p style={{ fontSize: '16px', marginBottom: '10px' }}>
+                                <strong>Frete:</strong> R$ {calcularFrete().toFixed(2)}
+                            </p>
+                            <p style={{
+                                fontSize: '20px',
                                 fontWeight: 'bold',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.3s',
-                                marginTop: '20px',
-                            }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = 'grey'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = 'black'}
-                        >
-                            Fechar
-                        </button>
-                    </Link>
-                </div>
-            )}
+                                marginBottom: '10px',
+                            }}>
+                                <strong>Total:</strong> R$ {calcularTotal()}
+                            </p>
+                        </div>
 
+                        {/* Forma de Pagamento */}
+                        <div style={{
+                            backgroundColor: '#fff',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            marginBottom: '0',
+                            textAlign: 'left',
+                        }}>
+                            <p style={{ fontSize: '16px', marginBottom: '0' }}>
+                                <strong>Forma de Pagamento:</strong> {formularioAtivo === 'Cartão' ? 'Cartão de Crédito' : 'Pix'}
+                            </p>
+                        </div>
+
+                        {/* Botão de Fechar Modal */}
+                        <Link href={`/paginas/home`}>
+                            <button
+                                onClick={() => setMostrarModalPG(false)}
+                                style={{
+                                    padding: '12px 20px',
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.3s',
+                                    marginTop: '20px',
+                                }}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = 'grey'}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = 'black'}
+                            >
+                                Fechar
+                            </button>
+                        </Link>
+
+                    </div>
+                )}
         </Pagina2 >
     );
 }

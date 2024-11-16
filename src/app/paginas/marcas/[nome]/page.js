@@ -3,82 +3,69 @@
 import Pagina2 from "@/app/components/Pagina2";
 import Link from "next/link";
 import { useEffect, useState } from 'react';
-import { Row, Col, Card, Dropdown, Container } from 'react-bootstrap';
+import { Row, Col, Card, Dropdown, Container, Modal, Button } from 'react-bootstrap';
 import { BiLogoVuejs } from "react-icons/bi";
 
 export default function Page({ params }) {
     const [loading, setLoading] = useState(true);
-
     const [produtos, setProdutos] = useState([]);
-    // Estado para armazenar todos os produtos
-
+    const [produtosFiltrados, setProdutosFiltrados] = useState([]); // Estado para armazenar os produtos filtrados
     const [marcas, setMarcas] = useState([]);
-    // Estado para armazenar as marcas
-
     const [tamanhos, setTamanhos] = useState([]);
-    // Estado para armazenar os tamanhos
-
+    const [categorias, setCategorias] = useState([]);
     const [marcaSelecionada, setMarcaSelecionada] = useState(null);
-    // Estado para armazenar a marca selecionada (iniciada como null)
-
     const [tamanhoSelecionado, setTamanhoSelecionado] = useState(null);
-    // Estado para armazenar o tamanho selecionado (iniciado como null)
-
+    const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
     const [ordemPreco, setOrdemPreco] = useState(null);
-    // Estado para armazenar a ordem de exibição dos produtos por preço
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        // useEffect para executar as linhas abaixo ao montar o componente (sempre que atualizar da url também)
         const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
-        //Armazenando todos os produtos salvos
-        
-        const marcaNome = decodeURIComponent(params.nome.toLowerCase()); // Converte o nome da marca para minúsculo
-        // Armazenando o nome da marca através da url (em minúsculo)
-        
+        const marcaNome = decodeURIComponent(params.nome.toLowerCase());
         const produtosMarca = produtosLocal.filter(produto => produto.marca.toLowerCase() === marcaNome);
-        // Armazenando os produtos que o atributo produto.marca (convertido para minúsculo) = mesmo nome do params (em minúsculo)
-
         setProdutos(produtosMarca);
-        // Atualizando os produtos com os produtos da marca atual
+        setProdutosFiltrados(produtosMarca); // Inicializa com todos os produtos filtrados (sem filtros)
 
         const marcasLocal = JSON.parse(localStorage.getItem('marcas')) || [];
-        // Armazenando todas as marcas salvas
-
         const tamanhosLocal = [...new Set(produtosMarca.map(produto => produto.tamanho))];
-        // Armazenando apenas os tamanhos de produtos da marca atual
+        const categoriasLocal = JSON.parse(localStorage.getItem('categorias')) || [];
+
         setMarcas(marcasLocal);
-        // Atualizando as marcas com as marcas salvas no LocalStorage
         setTamanhos(tamanhosLocal);
-        // Atualizando os tamanhos com os tamanhos dos produtos da marca
+        setCategorias(categoriasLocal);
         setLoading(false);
     }, []);
 
     const filtrarProdutos = () => {
-        // Criando função pra filtrar os produtos
-        const produtosLocal = JSON.parse(localStorage.getItem('produtos')) || [];
-        //Armazenando todos os produtos salvos
-
-        const marcaNome = decodeURIComponent(params.nome.toLowerCase());
-        // Armazenando o nome da marca em minúsculo
-
-        let produtosFiltrados = produtosLocal.filter(produto => produto.marca.toLowerCase() === marcaNome);
-        // Filtrando os produtos com a marca no mesmo formato (minúsculo)
+        let produtosFiltradosTemp = [...produtos]; // Copia os produtos
 
         if (tamanhoSelecionado) {
-            produtosFiltrados = produtosFiltrados.filter(produto => produto.tamanho === tamanhoSelecionado);
+            produtosFiltradosTemp = produtosFiltradosTemp.filter(produto => produto.tamanho === tamanhoSelecionado);
+        }
+
+        if (categoriaSelecionada) {
+            produtosFiltradosTemp = produtosFiltradosTemp.filter(produto => produto.categoria === categoriaSelecionada);
         }
 
         if (ordemPreco) {
-            produtosFiltrados.sort((a, b) => ordemPreco === 'maior' ? b.preco - a.preco : a.preco - b.preco);
+            produtosFiltradosTemp.sort((a, b) => ordemPreco === 'maior' ? b.preco - a.preco : a.preco - b.preco);
         }
 
-        setProdutos(produtosFiltrados);
-        // Atualiza os produtos com apenas os filtrados
+        setProdutosFiltrados(produtosFiltradosTemp); // Atualiza os produtos filtrados
     };
 
-    useEffect(() => {
-        filtrarProdutos();
-    }, [tamanhoSelecionado, ordemPreco]);
+    const handleFiltrarClick = () => {
+        filtrarProdutos(); // Aplica os filtros
+        setShowModal(false); // Fecha a modal
+    };
+
+    const resetFiltros = () => {
+        setTamanhoSelecionado(null);
+        setCategoriaSelecionada(null);
+        setOrdemPreco(null);
+        setProdutosFiltrados(produtos); // Restaura os produtos originais sem filtros
+        setShowModal(false);
+    };
 
     if (loading) {
         return (
@@ -94,7 +81,6 @@ export default function Page({ params }) {
                     color: 'black',
                     animation: 'pulse 1.5s ease-in-out infinite',
                     transformOrigin: 'center center',
-                    animation: 'pulse 1.5s ease-in-out infinite',
                 }} />
                 <style>
                     {`
@@ -127,85 +113,125 @@ export default function Page({ params }) {
                     {decodeURIComponent(params.nome)}
                 </h2>
 
-                {/* FILTROS  */}
-                <div style={{ display: 'flex', marginBottom: '20px', justifyContent: 'flex-start' }}>
-                    <Dropdown style={{ marginRight: '10px' }}>
-
-                        <Dropdown.Toggle style={{
-                            fontFamily: 'Montserrat, sans-serif',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            border: 'none',
-                            backgroundColor: 'black',
-                            color: 'white',
-                            width: '150px',
-                        }} id="dropdown-tamanho">
-                            {tamanhoSelecionado ? tamanhoSelecionado : 'Tamanho'}
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setTamanhoSelecionado(null); setOrdemPreco(null); }}>Todos</Dropdown.Item>
-                            {tamanhos.map(tamanho => (
-                                <Dropdown.Item key={tamanho} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setTamanhoSelecionado(tamanho); setOrdemPreco(null); }}>
-                                    {tamanho}
-                                </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-
-                    </Dropdown>
-
-                    <Dropdown>
-                        <Dropdown.Toggle style={{
-                            fontFamily: 'Montserrat, sans-serif',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            border: 'none',
-                            backgroundColor: 'black',
-                            color: 'white',
-                            width: '160px',
-                        }} id="dropdown-preco">
-                            {ordemPreco ? (ordemPreco === 'maior' ? 'Maior Primeiro' : 'Menor Primeiro') : 'Preço'}
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); setOrdemPreco(null); }}>Todos</Dropdown.Item>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('menor')}>Menor Preço</Dropdown.Item>
-                            <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('maior')}>Maior Preço</Dropdown.Item>
-                        </Dropdown.Menu>
-
-                    </Dropdown>
+                {/* BOTÃO FILTRAR */}
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <Button variant="dark" onClick={() => setShowModal(true)}>
+                        Filtrar
+                    </Button>
                 </div>
+
+                {/* MODAL DE FILTROS */}
+                <Modal show={showModal} onHide={() => setShowModal(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title style={{ fontFamily: 'Poppins, sans-serif', fontWeight: '900' }}>FILTROS</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {/* Filtro Tamanho */}
+                        <Dropdown style={{ marginBottom: '10px' }}>
+                            <Dropdown.Toggle style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                border: 'none',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                width: '100%',
+                            }} id="dropdown-tamanho">
+                                {tamanhoSelecionado ? tamanhoSelecionado : 'Tamanho'}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
+                                <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setTamanhoSelecionado(null); }}>Todos</Dropdown.Item>
+                                {tamanhos.map(tamanho => (
+                                    <Dropdown.Item key={tamanho} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setTamanhoSelecionado(tamanho); }}>
+                                        {tamanho}
+                                    </Dropdown.Item>
+                                ))}
+                            </Dropdown.Menu>
+                        </Dropdown>
+
+                        {/* Filtro Categoria */}
+                        <Dropdown style={{ marginBottom: '10px' }}>
+                            <Dropdown.Toggle style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                border: 'none',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                width: '100%',
+                            }} id="dropdown-categoria">
+                                {categoriaSelecionada ? categoriaSelecionada : 'Categoria'}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
+                                <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setCategoriaSelecionada(null); }}>Todas</Dropdown.Item>
+                                {categorias.map(categoria => (
+                                    <Dropdown.Item key={categoria.id} style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setCategoriaSelecionada(categoria.nome); }}>
+                                        {categoria.nome}
+                                    </Dropdown.Item>
+                                ))}
+                            </Dropdown.Menu>
+                        </Dropdown>
+
+                        {/* Filtro Preço */}
+                        <Dropdown style={{ marginBottom: '10px' }}>
+                            <Dropdown.Toggle style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                border: 'none',
+                                backgroundColor: 'black',
+                                color: 'white',
+                                width: '100%',
+                            }} id="dropdown-preco">
+                                {ordemPreco ? (ordemPreco === 'maior' ? 'Maior Primeiro' : 'Menor Primeiro') : 'Preço'}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu style={{ backgroundColor: 'black', color: 'white' }}>
+                                <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => { setOrdemPreco(null); }}>Todos</Dropdown.Item>
+                                <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('menor')}>Menor Preço</Dropdown.Item>
+                                <Dropdown.Item style={{ backgroundColor: 'black', color: 'white' }} onClick={() => setOrdemPreco('maior')}>Maior Preço</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={resetFiltros}>
+                            Resetar Filtros
+                        </Button>
+                        <Button variant="dark" onClick={handleFiltrarClick}>
+                            Aplicar Filtros
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
                 {/* CARDS DOS PRODUTOS */}
                 <Row>
-                    {produtos.map(produto => (
+                    {produtosFiltrados.map(produto => (
                         <Col md={2} key={produto.id} className="mb-4">
-
                             <Link href={`/paginas/produtos/${produto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <Card style={{ border: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}>
-
                                     <Card.Img
                                         variant="top"
                                         src={produto.imagem}
                                         style={{ objectFit: 'contain', height: '300px', width: '100%', border: '2px solid black', borderRadius: '07px' }}
                                     />
-
                                     <Card.Body style={{ padding: '0', marginTop: '5px', flexGrow: 1 }}>
-                                        <Card.Title style={{ margin: '0', fontFamily: 'Montserrat, sans-serif', fontWeight: '900', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                                        <Card.Title style={{
+                                            margin: '0', fontFamily: 'Montserrat, sans-serif', fontWeight: '900',
+                                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%'
+                                        }}>
                                             {produto.nome.length > 23 ? `${produto.nome.slice(0, 23)}...` : produto.nome}
                                         </Card.Title>
-                                        
                                         <Card.Text style={{ margin: '0', fontFamily: 'Montserrat, sans-serif', marginTop: 'auto' }}>
                                             R$ {produto.preco.toFixed(2)}
                                         </Card.Text>
                                     </Card.Body>
-
                                 </Card>
                             </Link>
                         </Col>
                     ))}
                 </Row>
-
             </Container>
         </Pagina2>
     );

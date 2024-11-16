@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navbar, Container, Nav, Dropdown, Form, Button, Modal, } from "react-bootstrap";
-import { BiLogoVuejs } from "react-icons/bi";
+import { BiListCheck, BiLogoVuejs } from "react-icons/bi";
 import { IoPerson } from "react-icons/io5";
 import { IoMdMenu } from "react-icons/io";
 import { FaBoxOpen, FaShoppingCart } from "react-icons/fa";
@@ -413,100 +413,105 @@ export default function Pagina2(props) {
                 </Container>
             </Navbar>
 
-           {/* Criando Modal */}
-<Modal
-    show={abrirModal}
-    onHide={fecharModal}
-    style={{
-        position: "fixed",
-        top: "50%",
-        left: "0",
-        transform: "translateY(-50%)",
-        width: "350px",
-    }}
-    className="custom-modal"
->
-    {/* Definindo que ao clicar na Modal e abri-la (puxando a função abrirModal irá exibir:*/}
+            {/* Criando Modal */}
+            <Modal
+                show={abrirModal}
+                onHide={fecharModal}
+                style={{
+                    position: "fixed",
+                    top: "50%",
+                    left: "0",
+                    transform: "translateY(-50%)",
+                    width: "350px",
+                }}
+                className="custom-modal"
+            >
+                {/* Definindo que ao clicar na Modal e abri-la (puxando a função abrirModal irá exibir:*/}
 
-    <Modal.Header style={{ backgroundColor: "black", color: "white" }}>
-        <Modal.Title style={{ width: '100%' }}>
-            <div style={{ display: 'flex' }}>
-                <IoPersonCircleOutline
-                    style={{ marginBottom: "5px", marginRight: "10px", fontSize: "35px" }}
-                />
-                <span>
-                    {clienteLogado && clienteLogado.nome ?
-                        `Olá, ${clienteLogado.nome}` :
-                        "Olá"}
-                </span>
-            </div>
-            <div style={{ marginTop: '5px', fontSize: '18px' }}>
-                Seja bem-vindo!
-            </div>
-        </Modal.Title>
-    </Modal.Header>
+                <Modal.Header style={{ backgroundColor: "black", color: "white" }}>
+                    <Modal.Title style={{ width: '100%' }}>
+                        <div style={{ display: 'flex' }}>
+                            <IoPersonCircleOutline
+                                style={{ marginBottom: "5px", marginRight: "10px", fontSize: "35px" }}
+                            />
+                            <span>
+                                {clienteLogado && clienteLogado.nome ?
+                                    `Olá, ${clienteLogado.nome}` :
+                                    "Olá"}
+                            </span>
+                        </div>
+                        <div style={{ marginTop: '5px', fontSize: '18px' }}>
+                            Seja bem-vindo!
+                        </div>
+                    </Modal.Title>
+                </Modal.Header>
 
-    {/* Mensagem de olá */}
-    <Modal.Body style={{ backgroundColor: "black", color: "white", fontSize: "20px" }}>
-        <ul style={{ padding: 0, listStyleType: "none" }}>
-            {/* Renderiza a opção "Minha Conta" apenas se o cliente estiver logado */}
-            {clienteLogado && clienteLogado.nome && (
-                <li>
-                    <Link href={`/paginas/clientes/Account`} style={{ textDecoration: 'none', color: 'white' }}>
-                        <AiFillHome style={{ marginBottom: "06px" }} /> Minha Conta
-                    </Link>
-                </li>
-            )}
-            <li>
-                <Link href={`/paginas/produtos`} style={{ textDecoration: 'none', color: 'white' }}>
-                    <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos
-                </Link>
-            </li>
-            <li>
-                <Link href={`/paginas/carrinho`} style={{ textDecoration: 'none', color: 'white' }}>
-                    <MdLocalGroceryStore style={{ marginBottom: "03px" }} /> Meu Carrinho
-                </Link>
-            </li>
-        </ul>
-    </Modal.Body>
+                {/* Mensagem de olá */}
+                <Modal.Body style={{ backgroundColor: "black", color: "white", fontSize: "20px" }}>
+                    <ul style={{ padding: 0, listStyleType: "none" }}>
+                        {/* Renderiza a opção "Minha Conta" apenas se o cliente estiver logado */}
+                        {clienteLogado && clienteLogado.nome && (
+                            <li>
+                                <Link href={`/paginas/clientes/Account`} style={{ textDecoration: 'none', color: 'white' }}>
+                                    <AiFillHome style={{ marginBottom: "06px" }} /> Minha Conta
+                                </Link>
+                            </li>
+                        )}
+                        <li>
+                            <Link href={`/paginas/produtos`} style={{ textDecoration: 'none', color: 'white' }}>
+                                <FaBoxOpen style={{ marginBottom: "03px" }} /> Produtos
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={`/paginas/carrinho`} style={{ textDecoration: 'none', color: 'white' }}>
+                                <MdLocalGroceryStore style={{ marginBottom: "03px" }} /> Meu Carrinho
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={`/paginas/clientes/Compras`} style={{ textDecoration: 'none', color: 'white' }}>
+                                <BiListCheck style={{ marginBottom: "03px", fontSize:'28px' }} /> Meus pedidos
+                            </Link>
+                        </li>
+                    </ul>
+                </Modal.Body>
 
-    {/* Criando Footer da Modal*/}
-    <Modal.Footer style={{ backgroundColor: "black", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {/* Exibir botões de login e cadastro apenas se o cliente não estiver logado */}
-        {!clienteLogado ? (
-            <>
-                <Button
-                    variant="light"
-                    style={{
-                        width: "100%",
-                        margin: "10px 0",
-                        fontWeight: "bold",
-                        color: "black",
-                        backgroundColor: "white",
-                    }}
-                    href="/login"
-                >
-                    LOGIN
-                </Button>
+                {/* Criando Footer da Modal*/}
+                <Modal.Footer style={{ backgroundColor: "black", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    {/* Exibir botões de login e cadastro apenas se o cliente não estiver logado */}
+                    {!clienteLogado ? (
+                        <>
+                            <Button
+                                variant="light"
+                                style={{
+                                    width: "100%",
+                                    margin: "10px 0",
+                                    fontWeight: "bold",
+                                    color: "black",
+                                    backgroundColor: "white",
+                                }}
+                                href="/login"
+                            >
+                                LOGIN
+                            </Button>
 
-                <Button
-                    variant="light"
-                    style={{
-                        width: "100%",
-                        margin: "10px 0",
-                        fontWeight: "bold",
-                        color: "white",
-                        backgroundColor: "black",
-                        border: "none",
-                    }}
-                    href="/cadastro"
-                >
-                    CADASTRE-SE
-                </Button>
-            </>
-        ) : null} {/* Não renderiza os botões se o cliente estiver logado */}
-    </Modal.Footer>
-</Modal>
+                            <Button
+                                variant="light"
+                                style={{
+                                    width: "100%",
+                                    margin: "10px 0",
+                                    fontWeight: "bold",
+                                    color: "white",
+                                    backgroundColor: "black",
+                                    border: "none",
+                                }}
+                                href="/cadastro"
+                            >
+                                CADASTRE-SE
+                            </Button>
+                        </>
+                    ) : null} {/* Não renderiza os botões se o cliente estiver logado */}
+                </Modal.Footer>
+            </Modal>
 
 
             <Container fluid className="my-2">

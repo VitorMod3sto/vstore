@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { FaCcMastercard, FaCcVisa } from 'react-icons/fa'; // Mastercard e Visa
 import { FaPix } from 'react-icons/fa6'; // Ícone de Pix
 import { BiLogoVuejs } from 'react-icons/bi';
+import { Button } from 'react-bootstrap';
 
 export default function CarrinhoPage() {
     const [clienteLogado, setClienteLogado] = useState(null);
@@ -182,7 +183,7 @@ export default function CarrinhoPage() {
                             minHeight: '100vh',
                         }}>
                             <div style={{
-                                border:'1px solid white',
+                                border: '1px solid white',
                                 padding: '40px',
                                 width: '400px',
                                 margin: '50px auto', // Margem superior e inferior
@@ -262,119 +263,143 @@ export default function CarrinhoPage() {
                     {/* Modal de Login */}
                     {showLoginForm && (
                         <div style={{
-                            padding: '40px',
-                            width: '400px',
-                            margin: '22px auto', // Margem superior e inferior
-                            backgroundColor: 'black',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                            color: 'white', // Para garantir que o texto seja visível
-                            textAlign: 'center'
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.6)', // Fundo escuro para a modal
+                            zIndex: 1000,
+                            minHeight: '100vh', // Garantir que a modal ocupe toda a altura da tela
                         }}>
-                            {/* Título */}
-                            <h2 style={{
-                                fontFamily: 'Montserrat, sans-serif',
-                                fontWeight: '700',
-                                fontSize: '24px',
-                                marginBottom: '30px',
-                                color: 'white'
+                            <div style={{
+                                border: '1px solid white',
+                                padding: '40px',
+                                width: '400px',
+                                margin: '50px auto', // Margem superior e inferior
+                                backgroundColor: 'black',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                                color: 'white',
+                                textAlign: 'center',
+                                minHeight: 'auto',  // Ajuste a altura para se ajustar ao conteúdo
                             }}>
-                                BEM VINDO DE VOLTA <BiLogoVuejs style={{ fontSize: '45px' }} />
-                            </h2>
-
-                            <div style={{ marginBottom: '20px' }}>
-                                {/* Campo de Email */}
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="E-mail"
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        marginBottom: '15px',
-                                        borderRadius: '5px',
-                                        border: '2px solid #333',
-                                        boxSizing: 'border-box', // Para garantir que a largura fique certa
-                                        fontSize: '16px'
-                                    }}
-                                />
-                                {/* Campo de Senha */}
-                                <input
-                                    type="password"
-                                    value={senha}
-                                    onChange={(e) => setSenha(e.target.value)}
-                                    placeholder="Senha"
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        marginBottom: '20px',
-                                        borderRadius: '5px',
-                                        border: '2px solid #333',
-                                        boxSizing: 'border-box',
-                                        fontSize: '16px'
-                                    }}
-                                />
-                            </div>
-
-                            {/* Mensagem de erro ou sucesso */}
-                            <div style={{ minHeight: '30px' }}>
-                                {loginMensagem && ( // Verifique o valor da variável de estado loginMensagem
-                                    <p style={{
-                                        textAlign: 'center',
-                                        color: 'red',
-                                        marginTop: '15px',
-                                        fontSize: '14px',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {loginMensagem}  {/* Exibe a mensagem */}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Botão de Login */}
-                            <button
-                                onClick={loginCliente}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    backgroundColor: '#007bff',
+                                <h2 style={{
+                                    fontFamily: 'Montserrat, sans-serif',
+                                    fontWeight: '700',
+                                    fontSize: '24px',
+                                    marginBottom: '30px',
                                     color: 'white',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    cursor: 'pointer',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    transition: 'background-color 0.3s ease'
-                                }}
-                            >
-                                ENTRAR
-                            </button>
+                                }}>
+                                    BEM VINDO DE VOLTA <BiLogoVuejs style={{ fontSize: '45px' }} />
+                                </h2>
 
-                            {/* Botão de Cadastro */}
-                            <div style={{ marginTop: '20px' }}>
-                                <p style={{ fontSize: '14px', color: 'white' }}>
-                                    Não tem conta?
-                                    <Link href="/paginas/cadastros" style={{
-                                        color: '#28a745',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold'
-                                    }}> Cadastre-se
-                                    </Link>
-                                </p>
+                                <div style={{ marginBottom: '20px' }}>
+                                    {/* Campo de Email */}
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="E-mail"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            marginBottom: '15px',
+                                            borderRadius: '5px',
+                                            border: '2px solid #333',
+                                            boxSizing: 'border-box', // Para garantir que a largura fique certa
+                                            fontSize: '16px'
+                                        }}
+                                    />
+                                    {/* Campo de Senha */}
+                                    <input
+                                        type="password"
+                                        value={senha}
+                                        onChange={(e) => setSenha(e.target.value)}
+                                        placeholder="Senha"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            marginBottom: '20px',
+                                            borderRadius: '5px',
+                                            border: '2px solid #333',
+                                            boxSizing: 'border-box',
+                                            fontSize: '16px'
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Mensagem de erro ou sucesso */}
+                                <div style={{ minHeight: '30px' }}>
+                                    {loginMensagem && ( // Verifique o valor da variável de estado loginMensagem
+                                        <p style={{
+                                            textAlign: 'center',
+                                            color: 'red',
+                                            marginTop: '15px',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {loginMensagem}  {/* Exibe a mensagem */}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Botão de Login */}
+                                <button
+                                    onClick={loginCliente}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: '#007bff',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        transition: 'background-color 0.3s ease'
+                                    }}
+                                >
+                                    ENTRAR
+                                </button>
+
+                                {/* Botão de Cadastro */}
+                                <div style={{ marginTop: '20px' }}>
+                                    <p style={{ fontSize: '14px', color: 'white' }}>
+                                        Não tem conta?
+                                        <Link href="/paginas/cadastros" style={{
+                                            color: '#28a745',
+                                            textDecoration: 'none',
+                                            fontWeight: 'bold'
+                                        }}> Cadastre-se
+                                        </Link>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}
 
+
                     {/* Lado esquerdo - Itens do Carrinho */}
                     {clienteLogado && (
-                        <div style={{ width: '60%', marginLeft: '5%', minHeight: '700px' }}>
+                        <div style={{
+                            width: '60%',
+                            marginLeft: '5%',
+                            minHeight: '700px',
+                            backgroundColor: '#f5f5f5',  // Fundo cinza
+                            padding: '20px',  // Adicionando algum espaçamento interno
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',  // Sombra para dar um destaque
+                        }}>
                             <h1 style={{
                                 fontFamily: 'Poppins, sans-serif',
                                 fontWeight: '900',
                                 fontSize: '30px',
                                 marginBottom: '35px',
-                                marginLeft: '05px'
+                                marginLeft: '0'  // Alinhando o título à esquerda
                             }}>
                                 CARRINHO
                             </h1>
@@ -387,13 +412,30 @@ export default function CarrinhoPage() {
                                         fontWeight: '900',
                                         fontSize: '28px',
                                         marginBottom: '5px',
-                                        marginLeft: '5px'
+                                        marginLeft: '0'  // Alinhando o título à esquerda
                                     }}>
                                         SEU CARRINHO ESTÁ VAZIO!
                                     </h1>
-                                    <p style={{ fontSize: '16px', color: 'BLACK', marginLeft: '5px' }}>
+                                    <p style={{ fontSize: '16px', color: 'BLACK', marginLeft: '0' }}>  {/* Ajustando o texto à esquerda */}
                                         Mas veja, ainda dá tempo de corrigir isso.
                                     </p>
+                                    <Button
+                                        href="/paginas/produtos"
+                                        style={{
+                                            padding: '10px 20px',
+                                            fontSize: '16px',
+                                            backgroundColor: '#000',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            textDecoration: 'none',
+                                            marginLeft: '0'  // Alinhando o botão à esquerda
+                                        }}
+                                    >
+                                        Ver produtos
+                                    </Button>
                                 </>
                             ) : (
                                 <ul style={{ listStyleType: 'none', padding: 0 }}>
@@ -407,7 +449,8 @@ export default function CarrinhoPage() {
                                                 marginBottom: '20px',
                                                 borderRadius: '8px',
                                                 minHeight: '120px',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
+                                                backgroundColor:'white'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', width: '70%' }}>
@@ -417,7 +460,9 @@ export default function CarrinhoPage() {
                                                 <div>
                                                     <h5 style={{
                                                         margin: '0', fontSize: '18px', fontWeight: 'bold', marginBottom: '5px'
-                                                    }}>{item.nome}</h5>
+                                                    }}>
+                                                        {item.nome}
+                                                    </h5>
 
                                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                                         <select
@@ -460,6 +505,7 @@ export default function CarrinhoPage() {
                             )}
                         </div>
                     )}
+
 
                     {/* Lado direito - Resumo e Finalizar Compra */}
                     {clienteLogado && (
