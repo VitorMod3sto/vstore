@@ -223,6 +223,15 @@ export default function Checkout() {
             return;
         }
 
+        // Recupera o número de parcelas selecionado
+        let numeroParcelas = 1; // Padrão é 1 parcela
+        if (formularioAtivo === 'Cartão') {
+            const selectParcelas = document.querySelector('select'); // Seleciona o dropdown de parcelas
+            if (selectParcelas) {
+                numeroParcelas = parseInt(selectParcelas.value, 10); // Obtém o número de parcelas selecionado
+            }
+        }
+
         // Coletando os dados do pedido
         const pedido = {
             id: Date.now(), // Gerando um ID único para o pedido com base no timestamp
@@ -234,7 +243,8 @@ export default function Checkout() {
                 imagem: item.imagem
             })),
             total: parseFloat(calcularTotal()), // Garantir que o total seja um número
-            metodoPagamento: formularioAtivo, // 'cartao' ou 'pix'
+            metodoPagamento: formularioAtivo, // 'Cartão' ou 'Pix'
+            parcelas: numeroParcelas, // Número de parcelas selecionadas (apenas para cartão)
             data: new Date().toLocaleString(), // Data de finalização do pedido
         };
 
@@ -256,13 +266,14 @@ export default function Checkout() {
     };
 
 
+
     // Função para limpar o carrinho
     const limparCarrinho = () => {
         setCarrinho([]); // Limpa o carrinho
         setMostrarModalPG(false); // Fecha a modal
     };
 
-    
+
     return (
         <Pagina2 titulo="Checkout">
             <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px', position: 'relative', border: '1px solid black', borderRadius: '10px' }}>
@@ -453,6 +464,7 @@ export default function Checkout() {
                             </div>
 
                             {/* Formulário de Cartão de Crédito */}
+                            {/* Formulário de Cartão de Crédito */}
                             {formularioAtivo === 'Cartão' && (
                                 <Form>
                                     <Form.Group className="mb-3">
@@ -482,14 +494,33 @@ export default function Checkout() {
                                         />
                                     </Form.Group>
 
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>CVV</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="XXX"
-                                            style={{ border: '1px solid black' }} // Borda fina preta
-                                        />
-                                    </Form.Group>
+                                    <Row>
+                                        <Col xs={6}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>CVV</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="XXX"
+                                                    style={{ border: '1px solid black' }} // Borda fina preta
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col xs={6}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>Parcelar em</Form.Label>
+                                                <Form.Select
+                                                    defaultValue="1"
+                                                    style={{ border: '1px solid black' }} // Borda fina preta
+                                                >
+                                                    {Array.from({ length: 10 }, (_, i) => i + 1).map(parcelas => (
+                                                        <option key={parcelas} value={parcelas}>
+                                                            {parcelas}x de R$ {(total / parcelas).toFixed(2)}
+                                                        </option>
+                                                    ))}
+                                                </Form.Select>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
 
                                     {/* Campo de Cupom */}
                                     <Form.Group className="mb-3">
@@ -529,6 +560,7 @@ export default function Checkout() {
                                     )}
                                 </Form>
                             )}
+
 
                             {/* Formulário de Pix */}
                             {formularioAtivo === 'Pix' && (
@@ -698,6 +730,7 @@ export default function Checkout() {
                 <p>APROVEITE FRETE GRÁTIS ACIMA DE R$250,00! <FaShippingFast style={{ fontSize: '25px', color: 'black' }} /></p>
             </div>
 
+            {/* Modal de Recibo */}
             {mostrarModalPG && (
                 <div style={{
                     position: 'fixed',
@@ -716,40 +749,26 @@ export default function Checkout() {
                     animation: 'fadeIn 1s ease-out',
                     width: '80%',
                     maxWidth: '500px',
-                    height: '80%', // Definindo altura da modal
-                    maxHeight: '600px', // Definindo altura máxima
-                    overflowY: 'auto', // Habilitando rolagem vertical
+                    height: '80%',
+                    maxHeight: '600px',
+                    overflowY: 'auto',
                 }}>
                     <style>
                         {`
-                ::-webkit-scrollbar {
-                    width: 8px;
-                    height: 8px;
-                }
-                ::-webkit-scrollbar-thumb {
-                    background-color: #888;
-                    border-radius: 10px;
-                }
-                ::-webkit-scrollbar-track {
-                    background: transparent;
-                    border-radius: 10px;
-                }
+            .bolinha-verde {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: #4CAF50;
+                animation: pulsar 1.5s infinite;
+                margin-right: 10px;
+            }
 
-                /* Animação da bolinha pulsante */
-                @keyframes pulsar {
-                    0% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(1.2); opacity: 0.7; }
-                    100% { transform: scale(1); opacity: 1; }
-                }
-                
-                .bolinha-verde {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    background-color: #4CAF50;
-                    animation: pulsar 1.5s infinite;
-                    margin-right: 10px;
-                }
+            @keyframes pulsar {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+            }
             `}
                     </style>
 
@@ -788,7 +807,7 @@ export default function Checkout() {
                     }}>
                         <p style={{ fontSize: '16px', marginBottom: '0', display: 'flex', alignItems: 'center' }}>
                             <span className="bolinha-verde"></span>
-                            <strong style={{ marginRight: '05px' }}>Status:  </strong> Aguardando para envio
+                            <strong style={{ marginRight: '5px' }}>Status:</strong> Aguardando para envio
                         </p>
                     </div>
 
@@ -820,7 +839,7 @@ export default function Checkout() {
                         ))}
                     </div>
 
-                    {/* Subtotal, Desconto, Frete e Total */}
+                    {/* Subtotal, Desconto, Frete, Total e Parcelamento */}
                     <div style={{
                         backgroundColor: '#fff',
                         padding: '15px',
@@ -835,12 +854,24 @@ export default function Checkout() {
                         )}
                         <p style={{ fontSize: '16px', marginBottom: '10px' }}><strong>Frete:</strong> R$ {calcularFrete().toFixed(2)}</p>
                         <p style={{
-                            fontSize: '20px',   /* Aumentei o tamanho da fonte */
-                            fontWeight: 'bold', /* Deixei em negrito */
+                            fontSize: '20px',
+                            fontWeight: 'bold',
                             marginBottom: '10px'
                         }}>
                             <strong>Total:</strong> R$ {calcularTotal()}
                         </p>
+
+                        {/* Exibir parcelamento apenas para cartão */}
+                        {formularioAtivo === 'Cartão' && dadosPedido.parcelas > 1 && (
+                            <p style={{
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                marginBottom: '10px',
+                                color: 'gray'
+                            }}>
+                                Parcelado em {dadosPedido.parcelas}x de R$ {(dadosPedido.total / dadosPedido.parcelas).toFixed(2)}
+                            </p>
+                        )}
                     </div>
 
                     {/* Forma de Pagamento */}
@@ -879,6 +910,7 @@ export default function Checkout() {
                     </Link>
                 </div>
             )}
+
 
         </Pagina2 >
     );

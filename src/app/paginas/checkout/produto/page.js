@@ -11,6 +11,8 @@ import { buscarEnderecoPorCep } from '@/services/apiViaCep';
 
 export default function Checkout() {
     const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+    const [parcelas, setParcelas] = useState(1); // Estado para armazenar o número de parcelas
+
     const [total, setTotal] = useState(0);
     const [formularioAtivo, setFormularioAtivo] = useState('Cartão');
     const [mostrarEndereco, setMostrarEndereco] = useState(true);
@@ -147,23 +149,21 @@ export default function Checkout() {
             return;
         }
     
-        const pedidoProduto = { // Alterado para "pedidoProduto"
+        const pedidoProduto = {
             id: Date.now(),
             cliente: clienteLogado.email,
             produto: produtoSelecionado,
-            total: parseFloat(calcularTotalComFrete()),
+            total: parseFloat(calcularTotal()),
             metodoPagamento: formularioAtivo,
+            parcelas,
             data: new Date().toLocaleString(),
         };
     
-        const pedidosProdutos = JSON.parse(localStorage.getItem('pedidosProdutos')) || []; // Alterado para "pedidosProdutos"
-        pedidosProdutos.push(pedidoProduto); // Alterado para "pedidoProduto"
-        localStorage.setItem('pedidosProdutos', JSON.stringify(pedidosProdutos)); // Alterado para "pedidosProdutos"
+        const pedidosProdutos = JSON.parse(localStorage.getItem('pedidosProdutos')) || [];
+        pedidosProdutos.push(pedidoProduto);
+        localStorage.setItem('pedidosProdutos', JSON.stringify(pedidosProdutos));
     
-        const clienteAtualizado = { ...clienteLogado, ultimoPedido: pedidoProduto.id };
-        localStorage.setItem('clienteLogado', JSON.stringify(clienteAtualizado));
-    
-        setDadosPedido(pedidoProduto); // Alterado para "pedidoProduto"
+        setDadosPedido(pedidoProduto);
         setMostrarModalPG(true);
     };
     
@@ -388,14 +388,26 @@ export default function Checkout() {
                                         />
                                     </Form.Group>
 
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>CVV</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="XXX"
-                                            style={{ border: '1px solid black' }}
-                                        />
-                                    </Form.Group>
+                                    <Row>
+                                        <Col xs={6}>
+                                            <Form.Group>
+                                                <Form.Label>CVV</Form.Label>
+                                                <Form.Control type="text" placeholder="XXX" />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col xs={6}>
+                                            <Form.Group>
+                                                <Form.Label>Parcelar em</Form.Label>
+                                                <Form.Select value={parcelas} onChange={(e) => setParcelas(parseInt(e.target.value, 10))}>
+                                                    {Array.from({ length: 10 }, (_, i) => i + 1).map(p => (
+                                                        <option key={p} value={p}>
+                                                            {p}x de R$ {(total / p).toFixed(2)}
+                                                        </option>
+                                                    ))}
+                                                </Form.Select>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
 
                                     {/* Campo de Cupom */}
                                     <Form.Group className="mb-3">
@@ -638,6 +650,24 @@ export default function Checkout() {
                 }
             `}
                         </style>
+                        <style>
+                        {`
+            .bolinha-verde {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: #4CAF50;
+                animation: pulsar 1.5s infinite;
+                margin-right: 10px;
+            }
+
+            @keyframes pulsar {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            `}
+                    </style>
 
                         <h2 style={{
                             color: '#333',
@@ -736,7 +766,23 @@ export default function Checkout() {
                             }}>
                                 <strong>Total:</strong> R$ {calcularTotal()}
                             </p>
+
+
+                            {/* Exibir parcelamento apenas para cartão */}
+                        {formularioAtivo === 'Cartão' && dadosPedido.parcelas > 1 && (
+                            <p style={{
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                marginBottom: '10px',
+                                color: 'gray'
+                            }}>
+                                Parcelado em {dadosPedido.parcelas}x de R$ {(dadosPedido.total / dadosPedido.parcelas).toFixed(2)}
+                            </p>
+                        )}
+
                         </div>
+
+
 
                         {/* Forma de Pagamento */}
                         <div style={{

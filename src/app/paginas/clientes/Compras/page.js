@@ -48,7 +48,7 @@ export default function Compras() {
             const pedidoProduto = {
                 id: pedido.id,
                 cliente: pedido.cliente,
-                itens: [{ 
+                itens: [{
                     nome: pedido.produto.nome,
                     preco: pedido.produto.preco,
                     imagem: pedido.produto.imagem,
@@ -57,11 +57,13 @@ export default function Compras() {
                 total: pedido.total,
                 data: pedido.data,
                 metodoPagamento: pedido.metodoPagamento,
+                parcelas: pedido.parcelas || 1, // Adiciona o número de parcelas ao objeto
             };
             setPedidoSelecionado(pedidoProduto);
         }
     };
     
+
 
     const calcularTotal = () => {
         if (!pedidoSelecionado) return 0;
@@ -515,19 +517,28 @@ export default function Compras() {
                                         <p><strong>Frete:</strong> R$ {calcularFrete().toFixed(2)}</p>
                                         <p><strong>Total:</strong> R$ {calcularTotal().toFixed(2)}</p>
                                         <p><strong>Forma de Pagamento:</strong> {pedidoSelecionado.metodoPagamento}</p>
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                                        {/* Exibir informações de parcelamento, se aplicável */}
+                                        {pedidoSelecionado.metodoPagamento === 'Cartão' && pedidoSelecionado.parcelas > 1 && (
+                                            <p style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '10px', color: '#555' }}>
+                                                Parcelado em {pedidoSelecionado.parcelas}x de R$ {(pedidoSelecionado.total / pedidoSelecionado.parcelas).toFixed(2)}
+                                            </p>
+                                        )}
+
+                                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '15px' }}>
                                             <span style={{
                                                 width: '10px',
                                                 height: '10px',
-                                                backgroundColor: 'green',
+                                                marginBottom:'15px'
+,                                                backgroundColor: 'green',
                                                 borderRadius: '50%',
-                                                marginRight: '05px',
-                                                marginBottom: '15px',
+                                                marginRight: '5px',
                                                 animation: 'pulse 1.5s infinite',
                                             }}></span>
                                             <p><strong>Status:</strong> {pedidoSelecionado.status || 'Aguardando para envio'}</p>
                                         </div>
                                     </div>
+
                                 </div>
                             )}
                         </div>
