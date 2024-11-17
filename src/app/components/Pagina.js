@@ -6,18 +6,17 @@ import Footer from "./Footer";
 export default function Pagina(props) {
     return (
         <>
-            <Navbar style={{ backgroundColor: '#003366' }} variant="dark">
+            <Navbar style={{ backgroundColor: 'black' }} variant="dark">
                 <Container>
-                    <Navbar.Brand href="/"> <BiLogoVuejs /> </Navbar.Brand>
+                    <Navbar.Brand href="/paginas/home"> <BiLogoVuejs /> </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="me-auto">
-                            <Nav.Link href="/" style={{ color: '#ffffff' }}>Início</Nav.Link>
                             <Nav.Link href="/produtos" style={{ color: '#ffffff' }}>Estoque</Nav.Link>
                             <NavDropdown title={<span style={{ color: '#ffffff' }}>Controle</span>} id="basic-nav-dropdown">
-                                <NavDropdown.Item href="/categorias" style={{ color: '#333333' }}>Categorias</NavDropdown.Item>
-                                <NavDropdown.Item href="/marcas" style={{ color: '#333333' }}>Marcas</NavDropdown.Item>
-                                <NavDropdown.Item href="/produtos" style={{ color: '#333333' }}>Produtos</NavDropdown.Item>
+                                <NavDropdown.Item href="/categorias" style={{ color: 'black' }}>Categorias</NavDropdown.Item>
+                                <NavDropdown.Item href="/marcas" style={{ color: 'black' }}>Marcas</NavDropdown.Item>
+                                <NavDropdown.Item href="/produtos" style={{ color: 'black' }}>Produtos</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
     

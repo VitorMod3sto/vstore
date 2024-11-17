@@ -371,7 +371,7 @@ export default function Page({ params }) {
                                     <Button onClick={handleSubmit} variant="success" style={{ fontWeight: 'bold' }}>
                                         <FaCheck style={{ marginBottom: '2px' }} /> Salvar
                                     </Button>
-                                    <Link href="/produtos" className="btn btn-light ms-3" style={{ color: '#003366', fontWeight: 'bold' }}>
+                                    <Link href="/produtos" className="btn btn-light ms-3" style={{ color: 'black', fontWeight: 'bold' }}>
                                         <IoMdArrowRoundBack style={{ marginBottom: '2px' }} /> Voltar
                                     </Link>
                                 </div>
@@ -384,7 +384,7 @@ export default function Page({ params }) {
 
             <style jsx>{`
                 .form-container {
-                    background-color: #003366; // Cor de fundo do container
+                    background-color: black; // Cor de fundo do container
                     color: white; // Cor do texto
                     padding: 20px; // Espaçamento interno
                     border-radius: 10px; // Bordas arredondadas

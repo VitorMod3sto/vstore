@@ -307,7 +307,7 @@ export default function Page({ params }) {
                             </h1>
 
                             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '28px', fontWeight: 'bold', marginBottom: '0' }}>
-                                R$ {produto.preco}
+                                R$ {produto.preco.toFixed(2)}
                             </p>
                             <p style={{ fontFamily: 'Poppins, sans-serif', marginTop: '-5px' }}>
                                 ou em até 10x de: <b> R$ {(produto.preco / 10).toFixed(2)}</b>

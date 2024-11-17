@@ -1,8 +1,8 @@
 'use client';
-import Pagina2 from '@/app/components/Pagina2';
 import { useEffect, useState } from 'react';
 import Link from 'next/link'; // Importando o Link
 import { BiLogoVuejs } from 'react-icons/bi';
+import Pagina2 from '@/app/components/Pagina2';
 
 export default function Page() {
     const [email, setEmail] = useState('');
@@ -20,31 +20,40 @@ export default function Page() {
     }, []);
 
     // Função de login
-    const loginCliente = () => {
-        const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        const cliente = clientes.find(cliente => cliente.email === email);
+const loginCliente = () => {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const cliente = clientes.find(cliente => cliente.email === email);
 
-        if (!cliente) {
-            setMensagem('E-mail não encontrado!');
-            setCorMensagem('red'); // Cor vermelha para erro
-            return;
-        }
-
-        if (cliente.senha !== senha) {
-            setMensagem('Senha incorreta!');
-            setCorMensagem('red'); // Cor vermelha para erro
-            return;
-        }
-
-        // Salvando o cliente logado no localStorage
-        localStorage.setItem('clienteLogado', JSON.stringify(cliente));
-        setMensagem('Login bem-sucedido!');
+    // Verifica se o login é do administrador
+    if (email === 'adm@gmail.com' && senha === 'flamengo') {
+        setMensagem('Login de administrador bem-sucedido!');
         setCorMensagem('green'); // Cor verde para sucesso
+        window.location.href = '/produtos'; // Redireciona para a página de produtos
+        return;
+    }
 
-        // Redirecionar para a página anterior ou para a página inicial
-        const previousPage = localStorage.getItem('previousPage') || '/paginas/home'; // Padrão para /paginas/home
-        window.location.href = previousPage;
-    };
+    if (!cliente) {
+        setMensagem('E-mail não encontrado!');
+        setCorMensagem('red'); // Cor vermelha para erro
+        return;
+    }
+
+    if (cliente.senha !== senha) {
+        setMensagem('Senha incorreta!');
+        setCorMensagem('red'); // Cor vermelha para erro
+        return;
+    }
+
+    // Salvando o cliente logado no localStorage
+    localStorage.setItem('clienteLogado', JSON.stringify(cliente));
+    setMensagem('Login bem-sucedido!');
+    setCorMensagem('green'); // Cor verde para sucesso
+
+    // Redirecionar para a página anterior ou para a página inicial
+    const previousPage = localStorage.getItem('previousPage') || '/paginas/home'; // Padrão para /paginas/home
+    window.location.href = previousPage;
+};
+
 
     return (
         <Pagina2 titulo="Login">
