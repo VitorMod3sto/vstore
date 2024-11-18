@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import apiLocalidade from '@/services/apiLocalidade';
 import { buscarEnderecoPorCep } from '@/services/apiViaCep';
+import InputMask from 'react-input-mask';
+
 
 export default function Checkout() {
     const [produtoSelecionado, setProdutoSelecionado] = useState(null);
@@ -363,10 +365,10 @@ export default function Checkout() {
                                 <Form>
                                     <Form.Group className="mb-3">
                                         <Form.Label>Número do Cartão</Form.Label>
-                                        <Form.Control
-                                            type="text"
+                                        <InputMask  style={{ border: '1px solid black' }}
+                                            mask="9999 9999 9999 9999" // Máscara para número do cartão
                                             placeholder="Digite o número do cartão"
-                                            style={{ border: '1px solid black' }}
+                                            className="form-control" // Estilização com Bootstrap
                                         />
                                     </Form.Group>
 
@@ -381,18 +383,22 @@ export default function Checkout() {
 
                                     <Form.Group className="mb-3">
                                         <Form.Label>Data de Vencimento</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="MM/AAAA"
-                                            style={{ border: '1px solid black' }}
+                                        <InputMask  style={{ border: '1px solid black' }}
+                                            mask="99/99" // Máscara para MM/AA
+                                            placeholder="MM/AA"
+                                            className="form-control"
                                         />
                                     </Form.Group>
 
                                     <Row>
                                         <Col xs={6}>
-                                            <Form.Group>
-                                                <Form.Label>CVV</Form.Label>
-                                                <Form.Control type="text" placeholder="XXX" />
+                                        <Form.Group  className="mb-3">
+                                                <Form.Label >CVV</Form.Label>
+                                                <InputMask  style={{ border: '1px solid black' }}
+                                                    mask="999" // Máscara para CVV
+                                                    placeholder="XXX"
+                                                    className="form-control"
+                                                />
                                             </Form.Group>
                                         </Col>
                                         <Col xs={6}>
