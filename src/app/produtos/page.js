@@ -77,7 +77,7 @@ export default function Page() {
                     <LuPackagePlus style={{ marginBottom: '4px' }} /> Adicionar
                 </Link>
 
-                <Row xs={1} md={2} lg={4} className="g-3">
+                <Row xs={1} md={2} lg={5} className="g-3">
                     {produtosFiltrados.map(item => (
                         <Col key={item.id}>
                             <Card style={{ backgroundColor: 'black', color: 'white', border: '1px solid white', height: '410px' }}>
