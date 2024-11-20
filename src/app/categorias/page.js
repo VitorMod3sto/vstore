@@ -1,5 +1,6 @@
 'use client'
 
+// Importanddo componentes e hooks
 import Pagina from "@/app/components/Pagina";
 import Link from "next/link";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
@@ -11,17 +12,29 @@ import { MdOutlineWysiwyg } from "react-icons/md";
 export default function Page() {
 
     const [categorias, setCategorias] = useState([]);
+    // Estado para armazenar as categorias
+
     const [search, setSearch] = useState('');
+  // Estado para armazenar os caracteres da pesquisa na barra de pesquisa
+
     const [categoriaFiltrada, setCategoriaFiltrada] = useState([]);
+      // Estado para armazenar as categorias filtradas
 
     useEffect(() => {
+        // UseEffect para buscar os produtos 
         const dados = JSON.parse(localStorage.getItem('categorias')) || [];
+        // Armazenando as categorias na variável 'dados'
         setCategorias(dados);
+        // Atualizando o estado de categorias com as categorias salvas (dados)
         setCategoriaFiltrada(dados);
+        // Atualizando também o estado das categorias filtradas
     }, []);
 
     function buscarCategoria() {
+        // Criando função de buscar categoria
         setCategoriaFiltrada(
+            /* Atualizando o estado de categorias filtradas com o resultado da busca de itens com o nome de mesmo
+            caracter/caracteres digitado na barra de pesquisa*/
             categorias.filter(item =>
                 item.nome.toLowerCase().includes(search.toLowerCase())
             )
@@ -29,6 +42,7 @@ export default function Page() {
     }
 
     function excluir(id) {
+        // Função de excluir categoria a partir do id da categoria
         if (confirm('Deseja realmente excluir?')) {
             const dados = categorias.filter(item => item.id !== id);
             localStorage.setItem('categorias', JSON.stringify(dados));

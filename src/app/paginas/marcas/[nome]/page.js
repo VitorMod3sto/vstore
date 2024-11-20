@@ -72,8 +72,25 @@ export default function Page({ params }) {
                 <BiLogoVuejs style={{
                     fontSize: '50px',
                     color: 'black',
+                    animation: 'pulse 1.5s ease-in-out infinite', // Aplique a animação de pulsação inline
+                    transformOrigin: 'center center',
                     animation: 'pulse 1.5s ease-in-out infinite',
                 }} />
+                <style>
+                    {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1); /* Tamanho original */
+                        }
+                        50% {
+                            transform: scale(1.2); /* Aumenta o tamanho */
+                        }
+                        100% {
+                            transform: scale(1); /* Retorna ao tamanho original */
+                        }
+                    }
+                    `}
+                </style>
             </div>
         );
     }
